@@ -35,6 +35,8 @@
       html,
       body {
         height: 100%;
+        width: 100%;
+        overflow: hidden;
       }
 
       body {
@@ -42,7 +44,8 @@
         font-family: "Cairo", sans-serif;
         color: var(--ink);
         background: linear-gradient(150deg, var(--bg-start), var(--bg-end));
-        min-height: 100dvh;
+        min-height: 100vh;
+        min-height: 100svh;
         position: relative;
         overflow: hidden;
       }
@@ -77,8 +80,10 @@
       .app {
         width: min(100%, 440px);
         margin: 0 auto;
-        height: 100dvh;
-        padding: 10px 10px 12px;
+        height: 100vh;
+        height: 100svh;
+        padding: calc(10px + env(safe-area-inset-top, 0px)) 10px
+          calc(12px + env(safe-area-inset-bottom, 0px));
         display: flex;
         flex-direction: column;
         gap: 10px;
@@ -137,8 +142,9 @@
       .screen {
         display: none;
         animation: rise 0.32s ease;
-        height: 100%;
+        flex: 1;
         min-height: 0;
+        width: 100%;
       }
 
       .screen.active {
@@ -167,6 +173,7 @@
         flex-direction: column;
         gap: 4px;
         width: 100%;
+        flex: 1;
         min-height: 0;
       }
 
@@ -416,6 +423,7 @@
 
       main {
         flex: 1;
+        display: flex;
         min-height: 0;
       }
 
@@ -606,7 +614,21 @@
       const finalTopic = document.getElementById("finalTopic");
       const resultList = document.getElementById("resultList");
 
+      function blurActiveElement() {
+        const active = document.activeElement;
+        if (active && typeof active.blur === "function") {
+          active.blur();
+        }
+      }
+
+      function resetViewportPosition() {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }
+
       function setScreen(name) {
+        blurActiveElement();
         Object.values(screens).forEach((screen) => screen.classList.remove("active"));
         screens[name].classList.add("active");
 
@@ -614,6 +636,11 @@
         const activeIndex = order.indexOf(name);
         progressBars.forEach((bar, index) => {
           bar.classList.toggle("active", index <= activeIndex);
+        });
+
+        requestAnimationFrame(() => {
+          resetViewportPosition();
+          setTimeout(resetViewportPosition, 60);
         });
       }
 
