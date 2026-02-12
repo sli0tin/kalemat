@@ -1,1041 +1,768 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة تخمين الصور</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تحدي الكلمات</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+      :root {
+        --bg-start: #f4fbff;
+        --bg-end: #fff6eb;
+        --ink: #12343b;
+        --muted: #5f7e86;
+        --primary: #0f8b8d;
+        --primary-dark: #0a7072;
+        --accent: #ff8a5b;
+        --surface: rgba(255, 255, 255, 0.88);
+        --surface-strong: #ffffff;
+        --border: rgba(18, 52, 59, 0.12);
+        --shadow: 0 14px 30px rgba(14, 52, 59, 0.16);
+        --radius-xl: 22px;
+        --radius-lg: 16px;
+        --radius-md: 12px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Cairo", sans-serif;
+        color: var(--ink);
+        background: linear-gradient(150deg, var(--bg-start), var(--bg-end));
+        min-height: 100dvh;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      body::before,
+      body::after {
+        content: "";
+        position: fixed;
+        border-radius: 50%;
+        filter: blur(2px);
+        z-index: -1;
+      }
+
+      body::before {
+        width: 280px;
+        height: 280px;
+        right: -120px;
+        top: -90px;
+        background: radial-gradient(circle at 40% 40%, #ffb38f, #ff8a5b);
+        opacity: 0.28;
+      }
+
+      body::after {
+        width: 320px;
+        height: 320px;
+        left: -150px;
+        bottom: -110px;
+        background: radial-gradient(circle at 50% 50%, #8ed4d5, #55b7b8);
+        opacity: 0.22;
+      }
+
+      body.no-scroll {
+        overflow: hidden;
+        touch-action: none;
+      }
+
+      .app {
+        width: min(100%, 440px);
+        margin: 0 auto;
+        min-height: 100dvh;
+        padding: 18px 16px 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .app-head {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 14px 16px;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(8px);
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(15, 139, 141, 0.12);
+        color: var(--primary-dark);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      h1 {
+        margin: 8px 0 2px;
+        font-size: 25px;
+        line-height: 1.25;
+      }
+
+      .subtitle {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .progress {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .progress span {
+        display: block;
+        height: 6px;
+        border-radius: 99px;
+        background: rgba(15, 139, 141, 0.16);
+        transition: background-color 0.25s ease;
+      }
+
+      .progress span.active {
+        background: linear-gradient(90deg, var(--primary), #48acaf);
+      }
+
+      .screen {
+        display: none;
+        animation: rise 0.32s ease;
+      }
+
+      .screen.active {
+        display: block;
+      }
+
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
         }
-        .text-shadow-lg {
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
-        .text-shadow-md {
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        /* Hide screens by default */
-        .screen {
-            display: none;
-        }
-        .screen.active {
-            display: flex; /* or block, depending on layout */
-        }
+      }
+
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        padding: 18px 14px;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(6px);
+      }
+
+      .panel h2 {
+        margin: 0 0 6px;
+        font-size: 21px;
+      }
+
+      .panel p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .form-grid {
+        display: grid;
+        gap: 12px;
+        margin-top: 14px;
+      }
+
+      label {
+        display: block;
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+
+      input[type="text"] {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        min-height: 48px;
+        padding: 12px 14px;
+        font: inherit;
+        color: var(--ink);
+        background: var(--surface-strong);
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+
+      input[type="text"]:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(15, 139, 141, 0.16);
+        outline: none;
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      button {
+        border: none;
+        font: inherit;
+        font-weight: 700;
+        border-radius: 12px;
+        min-height: 46px;
+        padding: 0 14px;
+        cursor: pointer;
+      }
+
+      .btn-primary {
+        flex: 1;
+        color: #fff;
+        background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      }
+
+      .btn-secondary {
+        color: var(--ink);
+        background: #eef5f6;
+      }
+
+      .error {
+        min-height: 20px;
+        margin-top: 10px;
+        font-size: 13px;
+        color: #c42c2c;
+      }
+
+      .hint {
+        margin-top: 12px;
+        background: rgba(255, 138, 91, 0.11);
+        color: #a14922;
+        border-radius: 12px;
+        padding: 8px 10px;
+        font-size: 13px;
+      }
+
+      .sortable-list {
+        list-style: none;
+        margin: 14px 0 0;
+        padding: 0;
+        display: grid;
+        gap: 10px;
+      }
+
+      .word-card {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background: var(--surface-strong);
+        box-shadow: 0 8px 18px rgba(16, 56, 63, 0.12);
+        padding: 13px 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        touch-action: none;
+        user-select: none;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+      }
+
+      .word-card.dragging {
+        opacity: 0.92;
+        box-shadow: 0 18px 30px rgba(11, 55, 60, 0.26);
+      }
+
+      .order-index {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: rgba(15, 139, 141, 0.14);
+        color: var(--primary-dark);
+        font-size: 13px;
+        font-weight: 800;
+        flex-shrink: 0;
+      }
+
+      .word-text {
+        flex: 1;
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .drag-mark {
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1;
+      }
+
+      .result-header {
+        margin-bottom: 14px;
+      }
+
+      .result-title {
+        margin: 0 0 10px;
+        font-size: 24px;
+      }
+
+      .player-meta {
+        background: var(--surface-strong);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 12px;
+        display: grid;
+        gap: 6px;
+      }
+
+      .meta-line {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+      }
+
+      .meta-line span {
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      .result-list {
+        display: grid;
+        gap: 12px;
+        margin-top: 14px;
+      }
+
+      .result-card {
+        background: var(--surface-strong);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 12px;
+      }
+
+      .result-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+
+      .result-rank {
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--primary-dark);
+      }
+
+      .result-length {
+        font-size: 13px;
+        color: var(--muted);
+        font-weight: 700;
+      }
+
+      .slots {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 6px;
+        overflow-x: auto;
+        padding-bottom: 2px;
+      }
+
+      .slot {
+        width: 34px;
+        height: 40px;
+        border: 1px solid rgba(18, 52, 59, 0.24);
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--ink);
+        flex-shrink: 0;
+        background: #fdfefe;
+      }
+
+      .slot.revealed {
+        background: rgba(15, 139, 141, 0.12);
+        border-color: rgba(15, 139, 141, 0.5);
+      }
+
+      .restart-wrap {
+        margin-top: 14px;
+      }
     </style>
-</head>
-<body class="min-h-screen flex items-center justify-center p-4 bg-gray-900">
-    <div id="app-container" class="w-full h-[90vh] max-w-6xl bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col">
-
-        <!-- Main Screen -->
-        <div id="main-screen" class="screen active flex-col items-center justify-center h-full p-4 bg-gradient-to-br from-blue-400 to-purple-600 rounded-lg shadow-xl">
-            <h1 class="text-4xl font-extrabold text-white mb-8 text-shadow-lg">لعبة تخمين الصور</h1>
-            <p class="text-lg text-white mb-8 text-center">العب مع أصدقائك وخمنوا الصور!</p>
-            <input
-                type="text"
-                id="main-player-name-input"
-                placeholder="أدخل اسمك"
-                class="w-full max-w-md p-3 mb-4 text-lg text-gray-800 bg-white rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 ease-in-out"
-            />
-            <button
-                id="create-room-btn-main"
-                class="w-full max-w-md p-4 mb-4 text-xl font-bold text-white bg-green-500 rounded-lg shadow-lg hover:bg-green-600 transform hover:scale-105 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-700"
-            >
-                إنشاء غرفة
-            </button>
-            <button
-                id="join-room-btn-main"
-                class="w-full max-w-md p-4 text-xl font-bold text-white bg-blue-500 rounded-lg shadow-lg hover:bg-blue-600 transform hover:scale-105 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-700"
-            >
-                الدخول على غرفة موجودة
-            </button>
-            <p id="user-id-display" class="text-sm text-white mt-4 opacity-75"></p>
+  </head>
+  <body>
+    <div class="app">
+      <header class="app-head">
+        <span class="badge">لعبة تحدي الكلمات</span>
+        <h1>رتب الكلمات من السهل إلى الأصعب</h1>
+        <p class="subtitle">نسخة سريعة ومريحة للجوال</p>
+        <div class="progress" id="progress">
+          <span class="active"></span>
+          <span></span>
+          <span></span>
+          <span></span>
         </div>
+      </header>
 
-        <!-- Create Room Screen -->
-        <div id="create-room-screen" class="screen flex-col items-center justify-center h-full p-4 bg-gradient-to-br from-green-400 to-teal-600 rounded-lg shadow-xl">
-            <h2 class="text-3xl font-bold text-white mb-6 text-shadow-md">إنشاء غرفة جديدة</h2>
-            <p class="text-lg text-white mb-8 text-center">سيتم إنشاء غرفة جديدة لك ومشاركتك رمزها.</p>
-            <input
-                type="text"
-                id="create-room-player-name-input"
-                placeholder="أدخل اسمك"
-                class="w-full max-w-md p-3 mb-4 text-lg text-gray-800 bg-white rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-teal-500 transition duration-300 ease-in-out"
-            />
-            <button
-                id="create-room-action-btn"
-                class="w-full max-w-md p-4 mb-4 text-xl font-bold text-white bg-blue-500 rounded-lg shadow-lg hover:bg-blue-600 transform hover:scale-105 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-700"
-            >
-                إنشاء الغرفة
-            </button>
-            <button
-                id="back-to-main-btn-create"
-                class="w-full max-w-md p-3 text-lg font-semibold text-white bg-gray-500 rounded-lg shadow-md hover:bg-gray-600 transform hover:scale-105 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-700"
-            >
-                العودة
-            </button>
-        </div>
+      <main>
+        <section class="screen active" id="screen-intro">
+          <div class="panel">
+            <h2>ابدأ الجولة</h2>
+            <p>اكتب اسمك وعنوان موضوع الكلمات.</p>
+            <form id="intro-form" class="form-grid">
+              <div>
+                <label for="playerName">اكتب اسمك</label>
+                <input
+                  id="playerName"
+                  type="text"
+                  placeholder="مثال: أحمد"
+                  autocomplete="name"
+                />
+              </div>
+              <div>
+                <label for="topicTitle">اكتب عنوان موضوع الكلمات</label>
+                <input
+                  id="topicTitle"
+                  type="text"
+                  placeholder="مثال: الفواكه"
+                  autocomplete="off"
+                />
+              </div>
+              <div class="actions">
+                <button class="btn-primary" type="submit">التالي</button>
+              </div>
+              <div class="error" id="introError" role="alert"></div>
+            </form>
+          </div>
+        </section>
 
-        <!-- Join Room Screen -->
-        <div id="join-room-screen" class="screen flex-col items-center justify-center h-full p-4 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-lg shadow-xl">
-            <h2 class="text-3xl font-bold text-white mb-6 text-shadow-md">الدخول على غرفة موجودة</h2>
-            <p class="text-lg text-white mb-8 text-center">أدخل رمز الغرفة واسمك للانضمام.</p>
-            <input
-                type="text"
-                id="join-room-code-input"
-                placeholder="رمز الغرفة"
-                class="w-full max-w-md p-3 mb-4 text-lg text-gray-800 bg-white rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300 ease-in-out"
-            />
-            <input
-                type="text"
-                id="join-room-player-name-input"
-                placeholder="أدخل اسمك"
-                class="w-full max-w-md p-3 mb-4 text-lg text-gray-800 bg-white rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300 ease-in-out"
-            />
-            <button
-                id="join-room-action-btn"
-                class="w-full max-w-md p-4 mb-4 text-xl font-bold text-white bg-green-500 rounded-lg shadow-lg hover:bg-green-600 transform hover:scale-105 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-700"
-            >
-                الدخول إلى الغرفة
-            </button>
-            <button
-                id="back-to-main-btn-join"
-                class="w-full max-w-md p-3 text-lg font-semibold text-white bg-gray-500 rounded-lg shadow-md hover:bg-gray-600 transform hover:scale-105 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-700"
-            >
-                العودة
-            </button>
-        </div>
+        <section class="screen" id="screen-words">
+          <div class="panel">
+            <h2>اكتب الكلمات الخمس</h2>
+            <p>كل كلمة يجب أن تكون مرتبطة بالموضوع.</p>
+            <form id="words-form" class="form-grid">
+              <div>
+                <label for="word1">الكلمة 1</label>
+                <input id="word1" type="text" placeholder="الكلمة الأولى" />
+              </div>
+              <div>
+                <label for="word2">الكلمة 2</label>
+                <input id="word2" type="text" placeholder="الكلمة الثانية" />
+              </div>
+              <div>
+                <label for="word3">الكلمة 3</label>
+                <input id="word3" type="text" placeholder="الكلمة الثالثة" />
+              </div>
+              <div>
+                <label for="word4">الكلمة 4</label>
+                <input id="word4" type="text" placeholder="الكلمة الرابعة" />
+              </div>
+              <div>
+                <label for="word5">الكلمة 5</label>
+                <input id="word5" type="text" placeholder="الكلمة الخامسة" />
+              </div>
+              <div class="actions">
+                <button class="btn-secondary" type="button" id="backToIntro">
+                  رجوع
+                </button>
+                <button class="btn-primary" type="submit">ترتيب الكلمات</button>
+              </div>
+              <div class="error" id="wordsError" role="alert"></div>
+            </form>
+          </div>
+        </section>
 
-        <!-- Game Room Screen -->
-        <div id="game-room-screen" class="screen flex-col h-full bg-gray-100 rounded-lg shadow-xl overflow-hidden">
-            <!-- Header -->
-            <div class="bg-gradient-to-r from-purple-600 to-indigo-700 text-white p-4 flex justify-between items-center shadow-md">
-                <h2 id="room-code-display" class="text-2xl font-bold">الغرفة:</h2>
-                <div class="flex items-center space-x-4">
-                    <span id="player-score-display" class="text-lg font-semibold"></span>
-                    <span id="opponent-score-display" class="text-lg font-semibold"></span>
-                    <span id="last-winner-display" class="text-lg font-semibold text-yellow-300"></span>
-                    <button
-                        id="leave-room-btn"
-                        class="p-2 bg-red-500 rounded-lg hover:bg-red-600 transition duration-300 ease-in-out text-sm font-semibold"
-                    >
-                        مغادرة الغرفة
-                    </button>
-                </div>
+        <section class="screen" id="screen-order">
+          <div class="panel">
+            <h2>رتب البطاقات</h2>
+            <p>اسحب البطاقة للأعلى أو للأسفل لتحديد الترتيب من السهل إلى الأصعب.</p>
+            <p class="hint">يمكنك الرجوع وتعديل أي كلمة قبل الإنهاء.</p>
+            <ul class="sortable-list" id="sortableList"></ul>
+            <div class="actions">
+              <button class="btn-secondary" type="button" id="editWords">
+                تعديل الكلمات
+              </button>
+              <button class="btn-primary" type="button" id="finishGame">
+                إنهاء
+              </button>
             </div>
+          </div>
+        </section>
 
-            <!-- Game Area and Chat -->
-            <!-- Responsive layout: flex-col on small screens, flex-row on medium and up -->
-            <div class="flex flex-1 overflow-hidden flex-col md:flex-row">
-                <!-- Game Section (Images) -->
-                <div class="w-full md:w-1/2 p-4 flex flex-col items-center justify-center bg-gray-200 border-b md:border-b-0 md:border-r border-gray-300">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">صورتي (لا تراها أنت):</h3>
-                    <!-- Responsive image sizing -->
-                    <img id="player-image-display" src="" alt="My Image" class="w-full h-auto max-w-64 max-h-64 object-cover rounded-lg shadow-lg mb-4 border-4 border-blue-500 hidden" />
-                    <div id="player-image-placeholder" class="w-full h-auto max-w-64 max-h-64 bg-gray-300 rounded-lg flex items-center justify-center text-gray-600 text-center text-sm shadow-inner mb-4">
-                        لا توجد صورة بعد.
-                    </div>
-
-                    <!-- Player's Image Input Section -->
-                    <div id="player-image-input-section" class="w-full max-w-md p-4 bg-white rounded-lg shadow-md mt-4 hidden">
-                        <h4 class="text-lg font-semibold mb-2">اكتب وصفًا لصورتك (ماذا سيخمنه الخصم):</h4>
-                        <input
-                            type="text"
-                            id="player-prompt-input"
-                            placeholder="مثال: قطة لطيفة، برج إيفل، طارق العلي"
-                            class="w-full p-2 mb-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        />
-                        <h4 class="text-lg font-semibold mb-2 mt-4">ثم اختر الصورة المطابقة من جهازك:</h4>
-                        <input
-                            type="file"
-                            id="image-upload-input"
-                            accept="image/*"
-                            class="w-full p-2 mb-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        />
-                        <button
-                            id="set-my-image-and-prompt-btn"
-                            class="w-full p-3 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 font-semibold"
-                        >
-                            تحديد وصفي وصورتي
-                        </button>
-                    </div>
-
-                    <h3 class="text-xl font-bold text-gray-800 mb-4 mt-8">صورة الخصم (خمنها!):</h3>
-                    <!-- Responsive image sizing -->
-                    <img id="opponent-image-display" src="" alt="Opponent's Image" class="w-full h-auto max-w-64 max-h-64 object-cover rounded-lg shadow-lg mb-4 border-4 border-green-500 hidden" />
-                    <div id="opponent-image-placeholder" class="w-full h-auto max-w-64 max-h-64 bg-gray-300 rounded-lg flex items-center justify-center text-gray-600 text-center text-sm shadow-inner mb-4">
-                        صورة الخصم ستظهر هنا.
-                    </div>
-
-                    <div id="loading-image-indicator" class="mt-4 text-blue-600 font-semibold flex items-center hidden">
-                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        جاري تحميل الصورة...
-                    </div>
-
-                    <div class="flex flex-wrap justify-center gap-4 mt-6">
-                        <button id="start-game-btn" class="p-3 bg-purple-500 text-white rounded-lg shadow-md hover:bg-purple-600 transform hover:scale-105 transition duration-300 ease-in-out font-bold hidden">
-                            بدء اللعبة
-                        </button>
-                        <button id="change-images-btn" class="p-3 bg-yellow-500 text-white rounded-lg shadow-md hover:bg-yellow-600 transform hover:scale-105 transition duration-300 ease-in-out font-bold hidden">
-                            تغيير الصور
-                        </button>
-                        <button id="guess-btn" class="p-3 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transform hover:scale-105 transition duration-300 ease-in-out font-bold hidden">
-                            أنا أخمن!
-                        </button>
-                        <button id="end-game-btn" class="p-3 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 transform hover:scale-105 transition duration-300 ease-in-out font-bold hidden">
-                            إنهاء اللعبة
-                        </button>
-                    </div>
-
-                    <div id="guess-input-container" class="mt-6 p-4 bg-white rounded-lg shadow-md w-full max-w-md hidden">
-                        <h4 class="text-lg font-semibold mb-2">ما هو تخمينك لصورة الخصم؟</h4>
-                        <input
-                            type="text"
-                            id="guess-text-input"
-                            placeholder="اكتب تخمينك هنا"
-                            class="w-full p-2 mb-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        />
-                        <div class="flex justify-end space-x-2">
-                            <button
-                                id="confirm-guess-btn"
-                                class="p-2 bg-green-500 text-white rounded-md hover:bg-green-600 font-semibold"
-                            >
-                                تأكيد التخمين
-                            </button>
-                            <button
-                                id="cancel-guess-btn"
-                                class="p-2 bg-gray-400 text-white rounded-md hover:bg-gray-500 font-semibold"
-                            >
-                                إلغاء
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Chat Section -->
-                <div class="w-full md:w-1/2 flex flex-col bg-white">
-                    <div id="messages-container" class="flex-1 p-4 overflow-y-auto custom-scrollbar">
-                        <!-- Messages will be appended here by JavaScript -->
-                    </div>
-
-                    <!-- Message Input -->
-                    <form id="message-form" class="p-4 border-t border-gray-300 bg-gray-50">
-                        <div class="flex items-center">
-                            <input
-                                type="text"
-                                id="new-message-input"
-                                placeholder="اكتب رسالتك..."
-                                class="flex-1 p-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800"
-                            />
-                            <button
-                                type="submit"
-                                id="send-message-btn"
-                                class="p-3 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition duration-300 ease-in-out font-bold shadow-md"
-                            >
-                                إرسال
-                            </button>
-                        </div>
-                    </form>
-                </div>
+        <section class="screen" id="screen-result">
+          <div class="panel">
+            <div class="result-header">
+              <h2 class="result-title">خذ سكرين شوت وشاركها مع خصمك</h2>
+              <div class="player-meta">
+                <p class="meta-line"><span>اللاعب:</span> <strong id="finalName"></strong></p>
+                <p class="meta-line">
+                  <span>عن:</span>
+                  "<strong id="finalTopic"></strong>"
+                </p>
+              </div>
             </div>
-        </div>
+            <div class="result-list" id="resultList"></div>
+            <div class="restart-wrap">
+              <button class="btn-secondary" id="restartBtn" type="button">
+                جولة جديدة
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
 
-    <!-- Message Box -->
-    <div id="message-box" class="fixed bottom-4 right-4 p-4 rounded-lg shadow-lg text-white font-semibold z-50 hidden">
-        <span id="message-box-text"></span>
-    </div>
-
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, onSnapshot, collection, query, orderBy, limit, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Global state variables
-        let userId = null;
-        let playerName = '';
-        let roomCode = '';
-        let roomData = null;
-        let messages = [];
-        let playerImage = '';
-        let opponentImage = '';
-        let loadingImage = false;
-        let showGuessInput = false;
-        let guessText = '';
-        let playerPromptInputText = ''; // Variable for player's prompt input
-
-        // Firebase configuration (directly from user's provided config)
-        const firebaseConfig = {
-            apiKey: "AIzaSyBLyoIoXp2aJCnhFqIFufMVBz0fzCS-FYY",
-            authDomain: "game-303eb.firebaseapp.com",
-            databaseURL: "https://game-303eb-default-rtdb.firebaseio.com",
-            projectId: "game-303eb",
-            storageBucket: "game-303eb.firebasestorage.app",
-            messagingSenderId: "22261863844",
-            appId: "1:22261863844:web:66f8541079b9025ec69d31",
-            measurementId: "G-RKN2F3HVHS"
-        };
-        // Extract appId from the config directly
-        const appId = firebaseConfig.appId;
-        // initialAuthToken is specific to Canvas and not available on GitHub Pages
-        const initialAuthToken = null; // Ensure it's null for external deployment
-
-        // Initialize Firebase App
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
-        // DOM Elements
-        const mainScreen = document.getElementById('main-screen');
-        const createRoomScreen = document.getElementById('create-room-screen');
-        const joinRoomScreen = document.getElementById('join-room-screen');
-        const gameRoomScreen = document.getElementById('game-room-screen');
-
-        const mainPlayerNameInput = document.getElementById('main-player-name-input');
-        const createRoomPlayerNameInput = document.getElementById('create-room-player-name-input');
-        const joinRoomCodeInput = document.getElementById('join-room-code-input');
-        const joinRoomPlayerNameInput = document.getElementById('join-room-player-name-input');
-
-        const userIdDisplay = document.getElementById('user-id-display');
-        const roomCodeDisplay = document.getElementById('room-code-display');
-        const playerScoreDisplay = document.getElementById('player-score-display');
-        const opponentScoreDisplay = document.getElementById('opponent-score-display');
-        const lastWinnerDisplay = document.getElementById('last-winner-display');
-
-        const playerImageDisplay = document.getElementById('player-image-display');
-        const playerImagePlaceholder = document.getElementById('player-image-placeholder');
-        const opponentImageDisplay = document.getElementById('opponent-image-display');
-        const opponentImagePlaceholder = document.getElementById('opponent-image-placeholder');
-        const loadingImageIndicator = document.getElementById('loading-image-indicator');
-
-        const playerImageInputSection = document.getElementById('player-image-input-section');
-        const playerPromptInput = document.getElementById('player-prompt-input');
-        const imageUploadInput = document.getElementById('image-upload-input'); // New
-        const setMyImageAndPromptBtn = document.getElementById('set-my-image-and-prompt-btn'); // New
-
-        const startGameBtn = document.getElementById('start-game-btn');
-        const changeImagesBtn = document.getElementById('change-images-btn');
-        const guessBtn = document.getElementById('guess-btn');
-        const endGameBtn = document.getElementById('end-game-btn');
-        const leaveRoomBtn = document.getElementById('leave-room-btn');
-
-        const guessInputContainer = document.getElementById('guess-input-container');
-        const guessTextInput = document.getElementById('guess-text-input');
-        const confirmGuessBtn = document.getElementById('confirm-guess-btn');
-        const cancelGuessBtn = document.getElementById('cancel-guess-btn'); // Fixed this line
-
-        const messagesContainer = document.getElementById('messages-container');
-        const newMessageInput = document.getElementById('new-message-input');
-        const messageForm = document.getElementById('message-form');
-
-        const messageBox = document.getElementById('message-box');
-        const messageBoxText = document.getElementById('message-box-text');
-
-        // --- Utility Functions ---
-
-        // Scroll to bottom of messages
-        const scrollToBottom = () => {
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        };
-
-        // Show message box
-        const showMessage = (msg, type) => {
-            messageBoxText.textContent = msg;
-            messageBox.classList.remove('hidden', 'bg-green-500', 'bg-red-500', 'bg-blue-500');
-            if (type === 'success') {
-                messageBox.classList.add('bg-green-500');
-            } else if (type === 'error') {
-                messageBox.classList.add('bg-red-500');
-            } else {
-                messageBox.classList.add('bg-blue-500');
-            }
-            messageBox.classList.remove('hidden');
-            setTimeout(() => {
-                messageBox.classList.add('hidden');
-            }, 3000); // Hide after 3 seconds
-        };
-
-        // Generate a random room code
-        const generateRoomCode = () => {
-            return Math.random().toString(36).substring(2, 8).toUpperCase();
-        };
-
-        // --- Screen Management ---
-        const showScreen = (screenId) => {
-            const screens = document.querySelectorAll('.screen');
-            screens.forEach(screen => screen.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-        };
-
-        // --- Firebase Authentication ---
-        const initializeAuth = async () => {
-            try {
-                // Log Firebase config to console for debugging
-                console.log("Firebase Config being used:", firebaseConfig);
-                if (initialAuthToken) { // This will be null on GitHub Pages
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-                console.log("Firebase Auth Initialized successfully. Current User:", auth.currentUser);
-            } catch (error) {
-                console.error("Error signing in:", error);
-                showMessage("حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى. تأكد من تفعيل المصادقة المجهولة في Firebase Console.", "error");
-            }
-        };
-
-        // --- Event Handlers ---
-
-        const handleCreateRoom = async () => {
-            playerName = createRoomPlayerNameInput.value.trim();
-            console.log("handleCreateRoom called. Player Name:", playerName);
-            if (!playerName) {
-                showMessage("الرجاء إدخال اسمك.", "error");
-                return;
-            }
-            // Ensure userId is set before proceeding
-            if (!userId) {
-                showMessage("لم يتم تهيئة المستخدم بعد. يرجى الانتظار قليلاً أو إعادة تحميل الصفحة.", "error");
-                console.error("User ID is null when trying to create room. Current auth.currentUser:", auth.currentUser);
-                return;
-            }
-            console.log("User ID is available:", userId);
-
-            const newRoomCode = generateRoomCode();
-            const roomDocRef = doc(db, `artifacts/${appId}/public/data/rooms`, newRoomCode);
-            console.log("Attempting to create room with code:", newRoomCode);
-
-            try {
-                await setDoc(roomDocRef, {
-                    roomCode: newRoomCode,
-                    player1Id: userId,
-                    player1Name: playerName,
-                    player1Score: 0,
-                    player2Id: null,
-                    player2Name: null,
-                    player2Score: 0,
-                    gameStarted: false,
-                    player1Image: '',
-                    player2Image: '',
-                    player1Prompt: '', // Store prompt for player 1
-                    player2Prompt: '', // Store prompt for player 2
-                    createdAt: new Date().toISOString(),
-                });
-                roomCode = newRoomCode;
-                showScreen('game-room-screen');
-                showMessage(`تم إنشاء الغرفة بنجاح! رمز الغرفة: ${newRoomCode}`, "success");
-                console.log("Room created successfully. Room code:", newRoomCode);
-                setupRoomListeners(); // Start listening to room data
-            } catch (error) {
-                console.error("Error creating room:", error);
-                showMessage("حدث خطأ أثناء إنشاء الغرفة. يرجى المحاولة مرة أخرى.", "error");
-            }
-        };
-
-        const handleJoinRoom = async () => {
-            roomCode = joinRoomCodeInput.value.trim();
-            playerName = joinRoomPlayerNameInput.value.trim();
-            console.log("handleJoinRoom called. Room Code:", roomCode, "Player Name:", playerName);
-            if (!roomCode || !playerName) {
-                showMessage("الرجاء إدخال رمز الغرفة واسمك.", "error");
-                return;
-            }
-            // Ensure userId is set before proceeding
-            if (!userId) {
-                showMessage("لم يتم تهيئة المستخدم بعد. يرجى الانتظار قليلاً أو إعادة تحميل الصفحة.", "error");
-                console.error("User ID is null when trying to join room. Current auth.currentUser:", auth.currentUser);
-                return;
-            }
-            console.log("User ID is available:", userId);
-
-            const roomDocRef = doc(db, `artifacts/${appId}/public/data/rooms`, roomCode);
-            console.log("Attempting to join room with code:", roomCode);
-            try {
-                const docSnap = await getDoc(roomDocRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    console.log("Room data found:", data);
-                    if (data.player1Id && data.player2Id) {
-                        showMessage("الغرفة ممتلئة بالفعل.", "error");
-                        console.log("Room is already full.");
-                        return;
-                    }
-                    if (data.player1Id === userId) {
-                        showMessage("أنت بالفعل في هذه الغرفة كلاعب 1.", "info");
-                        showScreen('game-room-screen');
-                        setupRoomListeners(); // Start listening to room data
-                        return;
-                    }
-
-                    // Add player 2
-                    await updateDoc(roomDocRef, {
-                        player2Id: userId,
-                        player2Name: playerName,
-                    });
-                    showScreen('game-room-screen');
-                    showMessage("تم الانضمام إلى الغرفة بنجاح!", "success");
-                    console.log("Joined room successfully as player 2.");
-                    setupRoomListeners(); // Start listening to room data
-                } else {
-                    showMessage("رمز الغرفة غير صحيح أو الغرفة غير موجودة.", "error");
-                    console.log("Room does not exist.");
-                }
-            } catch (error) {
-                console.error("Error joining room:", error);
-                showMessage("حدث خطأ أثناء الانضمام إلى الغرفة. يرجى المحاولة مرة أخرى.", "error");
-            }
-        };
-
-        const handleSendMessage = async (e) => {
-            e.preventDefault();
-            const messageText = newMessageInput.value.trim();
-            if (!messageText || !roomCode || !userId || !playerName) return;
-
-            const messagesColRef = collection(db, `artifacts/${appId}/public/data/rooms`, roomCode, 'messages');
-            try {
-                await addDoc(messagesColRef, {
-                    senderId: userId,
-                    senderName: playerName,
-                    text: messageText,
-                    timestamp: Date.now(),
-                });
-                newMessageInput.value = ''; // Clear input
-            } catch (error) {
-                console.error("Error sending message:", error);
-                showMessage("حدث خطأ أثناء إرسال الرسالة.", "error");
-            }
-        };
-
-        // Function to handle setting player image from local upload
-        const setPlayerImageFromUpload = async (playerNum, prompt, imageDataUrl) => {
-            loadingImage = true; // Show loading indicator
-            updateGameUI();
-            try {
-                const roomDocRef = doc(db, `artifacts/${appId}/public/data/rooms`, roomCode);
-                if (playerNum === 1) {
-                    await updateDoc(roomDocRef, {
-                        player1Image: imageDataUrl,
-                        player1Prompt: prompt,
-                    });
-                } else if (playerNum === 2) {
-                    await updateDoc(roomDocRef, {
-                        player2Image: imageDataUrl,
-                        player2Prompt: prompt,
-                    });
-                }
-                showMessage("تم تحديث وصورتك بنجاح!", "success");
-            } catch (error) {
-                console.error("Error setting image from upload:", error);
-                showMessage("حدث خطأ أثناء رفع الصورة وتحديدها. يرجى المحاولة مرة أخرى.", "error");
-            } finally {
-                loadingImage = false;
-                updateGameUI(); // Hide loading indicator
-            }
-        };
-
-        const handleSetMyImageAndPrompt = async () => {
-            const prompt = playerPromptInput.value.trim();
-            const file = imageUploadInput.files[0];
-
-            if (!prompt) {
-                showMessage("الرجاء إدخال وصف لصورتك.", "error");
-                return;
-            }
-            if (!file) {
-                showMessage("الرجاء اختيار صورة من جهازك.", "error");
-                return;
-            }
-            if (!roomData) {
-                showMessage("خطأ في بيانات الغرفة.", "error");
-                return;
-            }
-
-            // Check file size (optional, but good practice for Firestore limits)
-            const MAX_FILE_SIZE_MB = 0.8; // ~800KB to stay well within 1MB Firestore limit
-            if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-                showMessage(`حجم الصورة كبير جدًا. الحد الأقصى هو ${MAX_FILE_SIZE_MB} ميجابايت.`, "error");
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const imageDataUrl = e.target.result;
-                const isPlayer1 = roomData.player1Id === userId;
-                const playerNum = isPlayer1 ? 1 : 2;
-                await setPlayerImageFromUpload(playerNum, prompt, imageDataUrl);
-            };
-            reader.onerror = (error) => {
-                console.error("Error reading file:", error);
-                showMessage("فشل قراءة الصورة. يرجى المحاولة مرة أخرى.", "error");
-            };
-            reader.readAsDataURL(file); // Read the file as a base64 encoded string
-        };
-
-
-        const handleStartGame = async () => {
-            if (!roomData || !roomData.player1Id || !roomData.player2Id) {
-                showMessage("يجب أن يكون هناك لاعبان لبدء اللعبة.", "error");
-                return;
-            }
-            if (!roomData.player1Image || !roomData.player2Image) {
-                showMessage("يجب على كلا اللاعبين تحديد صورتهما أولاً.", "error");
-                return;
-            }
-
-            const roomDocRef = doc(db, `artifacts/${appId}/public/data/rooms`, roomCode);
-            try {
-                await updateDoc(roomDocRef, {
-                    gameStarted: true,
-                });
-                showMessage("بدأت اللعبة!", "success");
-            } catch (error) {
-                console.error("Error starting game:", error);
-                showMessage("حدث خطأ أثناء بدء اللعبة.", "error");
-            }
-        };
-
-        const handleChangeImages = async () => {
-            if (!roomData || !roomData.player1Id || !roomData.player2Id) {
-                showMessage("يجب أن يكون هناك لاعبان لتغيير الصور.", "error");
-                return;
-            }
-            // Reset images and prompts, set gameStarted to false to allow re-selection
-            const roomDocRef = doc(db, `artifacts/${appId}/public/data/rooms`, roomCode);
-            try {
-                await updateDoc(roomDocRef, {
-                    player1Image: '',
-                    player2Image: '',
-                    player1Prompt: '',
-                    player2Prompt: '',
-                    gameStarted: false, // Allow players to set new images
-                });
-                showMessage("يمكنك الآن تغيير صورك.", "info");
-            } catch (error) {
-                console.error("Error changing images:", error);
-                showMessage("حدث خطأ أثناء تغيير الصور.", "error");
-            }
-        };
-
-        const handleGuess = async () => {
-            guessText = guessTextInput.value.trim();
-            if (!guessText) {
-                showMessage("الرجاء إدخال تخمينك.", "error");
-                return;
-            }
-
-            const roomDocRef = doc(db, `artifacts/${appId}/public/data/rooms`, roomCode);
-            let opponentPrompt = '';
-            let currentPlayerScoreField = '';
-
-            const isPlayer1 = roomData.player1Id === userId;
-            if (isPlayer1) {
-                opponentPrompt = roomData.player2Prompt;
-                currentPlayerScoreField = 'player1Score';
-            } else {
-                opponentPrompt = roomData.player1Prompt;
-                currentPlayerScoreField = 'player2Score';
-            }
-
-            // Fuzzy matching: check if the guess text includes the opponent's prompt text (case-insensitive)
-            // This allows for partial matches like "سيارة" matching "سيارة حمراء"
-            const isCorrect = opponentPrompt && guessText.toLowerCase().includes(opponentPrompt.toLowerCase());
-
-            if (isCorrect) {
-                const currentScore = roomData[currentPlayerScoreField] || 0;
-                await updateDoc(roomDocRef, {
-                    [currentPlayerScoreField]: currentScore + 1,
-                    gameStarted: false, // End the round, which will reveal the image
-                    lastWinnerId: userId, // Store winner for display
-                    lastWinnerName: playerName,
-                });
-                showMessage("تخمين صحيح! لقد ربحت هذه الجولة.", "success");
-                showGuessInput = false;
-                guessTextInput.value = '';
-                updateGameUI(); // Update UI to show the revealed image and scores
-            } else {
-                showMessage("تخمين خاطئ. حاول مرة أخرى!", "error");
-            }
-        };
-
-        const handleEndGame = async () => {
-            if (!roomData) return;
-
-            const roomDocRef = doc(db, `artifacts/${appId}/public/data/rooms`, roomCode);
-            try {
-                await updateDoc(roomDocRef, {
-                    gameStarted: false,
-                    player1Image: '',
-                    player2Image: '',
-                    player1Prompt: '',
-                    player2Prompt: '',
-                });
-                showMessage("تم إنهاء اللعبة. يمكنك بدء جولة جديدة أو مغادرة الغرفة.", "info");
-                showGuessInput = false;
-                guessTextInput.value = '';
-                updateGameUI();
-            }
-            catch (error) {
-                console.error("Error ending game:", error);
-                showMessage("حدث خطأ أثناء إنهاء اللعبة.", "error");
-            }
-        };
-
-        const handleLeaveRoom = async () => {
-            if (!roomCode || !userId) {
-                roomCode = '';
-                roomData = null;
-                messages = [];
-                playerImage = '';
-                opponentImage = '';
-                playerName = '';
-                showScreen('main-screen');
-                updateMainUI();
-                return;
-            }
-
-            const roomDocRef = doc(db, `artifacts/${appId}/public/data/rooms`, roomCode);
-            try {
-                const docSnap = await getDoc(roomDocRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if (data.player1Id === userId) {
-                        // If player 1 leaves, promote player 2 to player 1
-                        await updateDoc(roomDocRef, {
-                            player1Id: data.player2Id || null,
-                            player1Name: data.player2Name || null,
-                            player1Score: data.player2Score || 0,
-                            player1Image: data.player2Image || '',
-                            player1Prompt: data.player2Prompt || '',
-                            player2Id: null,
-                            player2Name: null,
-                            player2Score: 0,
-                            player2Image: '',
-                            player2Prompt: '',
-                            gameStarted: false,
-                        });
-                        // If player 2 also leaves (or was never there), delete the room
-                        if (!data.player2Id) {
-                            await deleteDoc(roomDocRef);
-                        }
-                    } else if (data.player2Id === userId) {
-                        // If player 2 leaves, clear player 2 data
-                        await updateDoc(roomDocRef, {
-                            player2Id: null,
-                            player2Name: null,
-                            player2Score: 0,
-                            player2Image: '',
-                            player2Prompt: '',
-                            gameStarted: false,
-                        });
-                    }
-                    // Delete all messages in the subcollection
-                    const messagesColRef = collection(db, `artifacts/${appId}/public/data/rooms`, roomCode, 'messages');
-                    const q = query(messagesColRef);
-                    const snapshot = await getDocs(q);
-                    const deletePromises = [];
-                    snapshot.forEach((doc) => {
-                        deletePromises.push(deleteDoc(doc.ref));
-                    });
-                    await Promise.all(deletePromises);
-                }
-            } catch (error) {
-                console.error("Error leaving room:", error);
-                showMessage("حدث خطأ أثناء مغادرة الغرفة.", "error");
-            } finally {
-                roomCode = '';
-                roomData = null;
-                messages = [];
-                playerImage = '';
-                opponentImage = '';
-                playerName = '';
-                showScreen('main-screen');
-                updateMainUI();
-            }
-        };
-
-        // --- UI Update Functions ---
-
-        const updateMainUI = () => {
-            mainPlayerNameInput.value = playerName;
-            userIdDisplay.textContent = userId ? `معرف المستخدم الخاص بك: ${userId}` : '';
-        };
-
-        const updateCreateRoomUI = () => {
-            createRoomPlayerNameInput.value = playerName;
-        };
-
-        const updateJoinRoomUI = () => {
-            joinRoomCodeInput.value = roomCode;
-            joinRoomPlayerNameInput.value = playerName;
-        };
-
-        const updateGameUI = () => {
-            if (!roomData) {
-                roomCodeDisplay.textContent = 'الغرفة:';
-                playerScoreDisplay.textContent = '';
-                opponentScoreDisplay.textContent = '';
-                lastWinnerDisplay.textContent = '';
-                playerImageDisplay.classList.add('hidden');
-                playerImagePlaceholder.classList.remove('hidden');
-                opponentImageDisplay.classList.add('hidden');
-                opponentImagePlaceholder.classList.remove('hidden');
-                playerImageInputSection.classList.add('hidden'); // Hide input section
-                startGameBtn.classList.add('hidden');
-                changeImagesBtn.classList.add('hidden');
-                guessBtn.classList.add('hidden');
-                endGameBtn.classList.add('hidden');
-                guessInputContainer.classList.add('hidden');
-                loadingImageIndicator.classList.add('hidden');
-                messagesContainer.innerHTML = '';
-                return;
-            }
-
-            const isPlayer1 = roomData.player1Id === userId;
-            const opponentName = isPlayer1 ? roomData.player2Name : roomData.player1Name;
-            const player1Score = roomData.player1Score || 0;
-            const player2Score = roomData.player2Score || 0;
-            const myScore = isPlayer1 ? player1Score : player2Score;
-            const otherScore = isPlayer1 ? player2Score : player1Score;
-
-            roomCodeDisplay.textContent = `الغرفة: ${roomCode}`;
-            playerScoreDisplay.textContent = `${playerName}: ${myScore} نقطة`;
-            opponentScoreDisplay.textContent = opponentName ? `${opponentName}: ${otherScore} نقطة` : '';
-            lastWinnerDisplay.textContent = roomData.lastWinnerName && !roomData.gameStarted ? `الفائز في الجولة الأخيرة: ${roomData.lastWinnerName}` : '';
-
-            // Determine current player's image and opponent's image/prompt
-            let currentPlayerImage = '';
-            let currentOpponentImage = '';
-            let currentPlayerPrompt = '';
-            let currentOpponentPrompt = '';
-
-            if (isPlayer1) {
-                currentPlayerImage = roomData.player1Image || '';
-                currentOpponentImage = roomData.player2Image || '';
-                currentPlayerPrompt = roomData.player1Prompt || '';
-                currentOpponentPrompt = roomData.player2Prompt || '';
-            } else {
-                currentPlayerImage = roomData.player2Image || '';
-                currentOpponentImage = roomData.player1Image || '';
-                currentPlayerPrompt = roomData.player2Prompt || '';
-                currentOpponentPrompt = roomData.player1Prompt || '';
-            }
-            playerImage = currentPlayerImage; // Update global playerImage for consistency
-            opponentImage = currentOpponentImage; // Update global opponentImage for consistency
-
-            // Display current player's image (always visible to themselves)
-            if (currentPlayerImage) {
-                playerImageDisplay.src = currentPlayerImage;
-                playerImageDisplay.classList.remove('hidden');
-                playerImagePlaceholder.classList.add('hidden');
-            } else {
-                playerImageDisplay.classList.add('hidden');
-                playerImagePlaceholder.classList.remove('hidden');
-            }
-
-            // Display opponent's image: show only if game is NOT started (i.e., round ended/not yet started)
-            // Otherwise, show placeholder during active game.
-            if (currentOpponentImage && !roomData.gameStarted) {
-                opponentImageDisplay.src = currentOpponentImage;
-                opponentImageDisplay.classList.remove('hidden');
-                opponentImagePlaceholder.classList.add('hidden');
-            } else {
-                opponentImageDisplay.classList.add('hidden');
-                opponentImagePlaceholder.classList.remove('hidden');
-            }
-
-
-            // Show/hide player image input section
-            const bothPlayersPresent = roomData.player1Id && roomData.player2Id;
-            const playerHasImage = isPlayer1 ? roomData.player1Image : roomData.player2Image;
-
-            if (bothPlayersPresent && !roomData.gameStarted && !playerHasImage) {
-                playerImageInputSection.classList.remove('hidden');
-                playerPromptInput.value = currentPlayerPrompt; // Pre-fill if exists
-                imageUploadInput.value = ''; // Clear file input on display
-            } else {
-                playerImageInputSection.classList.add('hidden');
-            }
-
-            // Game control buttons visibility
-            const allImagesSet = roomData.player1Image && roomData.player2Image;
-            startGameBtn.classList.toggle('hidden', roomData.gameStarted || !bothPlayersPresent || !allImagesSet);
-            changeImagesBtn.classList.toggle('hidden', !bothPlayersPresent || !allImagesSet || roomData.gameStarted); // Show if both present and images set, but game not started
-            guessBtn.classList.toggle('hidden', !roomData.gameStarted);
-            endGameBtn.classList.toggle('hidden', !roomData.gameStarted);
-
-
-            // Guess input visibility
-            guessInputContainer.classList.toggle('hidden', !showGuessInput);
-
-            // Loading indicator visibility
-            loadingImageIndicator.classList.toggle('hidden', !loadingImage);
-
-            // Update messages
-            messagesContainer.innerHTML = ''; // Clear existing messages
-            messages.forEach(msg => {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `flex mb-3 ${msg.senderId === userId ? 'justify-end' : 'justify-start'}`;
-
-                const messageContentDiv = document.createElement('div');
-                messageContentDiv.className = `max-w-[70%] p-3 rounded-lg shadow-sm ${
-                    msg.senderId === userId
-                        ? 'bg-blue-500 text-white rounded-br-none'
-                        : 'bg-gray-200 text-gray-800 rounded-bl-none'
-                }`;
-
-                const senderNameDiv = document.createElement('div');
-                senderNameDiv.className = 'font-semibold text-sm mb-1';
-                senderNameDiv.textContent = msg.senderId === userId ? 'أنت' : msg.senderName;
-
-                const textDiv = document.createElement('div');
-                textDiv.textContent = msg.text;
-
-                const timestampDiv = document.createElement('div');
-                timestampDiv.className = 'text-xs opacity-75 mt-1';
-                timestampDiv.textContent = new Date(msg.timestamp).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
-
-                messageContentDiv.appendChild(senderNameDiv);
-                messageContentDiv.appendChild(textDiv);
-                messageContentDiv.appendChild(timestampDiv);
-                messageDiv.appendChild(messageContentDiv);
-                messagesContainer.appendChild(messageDiv);
-            });
-            scrollToBottom();
-        };
-
-        // --- Firebase Listeners Setup ---
-        let unsubscribeRoom = null;
-        let unsubscribeMessages = null;
-
-        const setupRoomListeners = () => {
-            // Unsubscribe previous listeners if they exist
-            if (unsubscribeRoom) unsubscribeRoom();
-            if (unsubscribeMessages) unsubscribeMessages();
-
-            if (!roomCode || !userId) return;
-
-            const roomDocRef = doc(db, `artifacts/${appId}/public/data/rooms`, roomCode);
-            unsubscribeRoom = onSnapshot(roomDocRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    roomData = data;
-                    updateGameUI();
-                } else {
-                    roomData = null;
-                    showMessage("الغرفة غير موجودة أو تم حذفها.", "error");
-                    showScreen('main-screen');
-                    updateMainUI();
-                }
-            }, (error) => {
-                console.error("Error listening to room data:", error);
-                showMessage("حدث خطأ أثناء تحميل بيانات الغرفة.", "error");
-            });
-
-            const messagesColRef = collection(db, `artifacts/${appId}/public/data/rooms`, roomCode, 'messages');
-            const q = query(messagesColRef, orderBy('timestamp', 'asc'), limit(100)); // Limit messages for performance
-            unsubscribeMessages = onSnapshot(q, (snapshot) => {
-                messages = [];
-                snapshot.forEach(doc => messages.push(doc.data()));
-                updateGameUI(); // Update UI to show new messages
-            }, (error) => {
-                console.error("Error listening to messages:", error);
-                showMessage("حدث خطأ أثناء تحميل الرسائل.", "error");
-            });
-        };
-
-        // --- Initial Setup and Event Listeners ---
-        document.addEventListener('DOMContentLoaded', async () => {
-            console.log('DOM Content Loaded. Initializing Firebase...');
-            await initializeAuth(); // Ensure auth is ready first
-            onAuthStateChanged(auth, (currentUser) => {
-                if (currentUser) {
-                    userId = currentUser.uid;
-                    console.log('Auth state changed. User ID set to:', userId);
-                } else {
-                    // This case should ideally not be hit if signInAnonymously is successful.
-                    // If it is, it means anonymous sign-in failed or user logged out.
-                    userId = crypto.randomUUID(); // Fallback to a random ID if no user, though less ideal for persistence.
-                    console.warn('Auth state changed. No current user detected, falling back to random User ID:', userId);
-                }
-                updateMainUI(); // Update UI once userId is set
-            });
-
-            // Main screen buttons
-            document.getElementById('create-room-btn-main').addEventListener('click', () => {
-                console.log('Create Room button clicked (Main Screen)');
-                playerName = mainPlayerNameInput.value.trim();
-                showScreen('create-room-screen');
-                updateCreateRoomUI();
-            });
-            document.getElementById('join-room-btn-main').addEventListener('click', () => {
-                console.log('Join Room button clicked (Main Screen)');
-                playerName = mainPlayerNameInput.value.trim();
-                showScreen('join-room-screen');
-                updateJoinRoomUI();
-            });
-
-            // Create room screen buttons
-            document.getElementById('create-room-action-btn').addEventListener('click', handleCreateRoom);
-            document.getElementById('back-to-main-btn-create').addEventListener('click', () => {
-                showScreen('main-screen');
-                updateMainUI();
-            });
-
-            // Join room screen buttons
-            document.getElementById('join-room-action-btn').addEventListener('click', handleJoinRoom);
-            document.getElementById('back-to-main-btn-join').addEventListener('click', () => {
-                showScreen('main-screen');
-                updateMainUI();
-            });
-
-            // Game room buttons
-            setMyImageAndPromptBtn.addEventListener('click', handleSetMyImageAndPrompt); // New event listener for upload
-            startGameBtn.addEventListener('click', handleStartGame);
-            changeImagesBtn.addEventListener('click', handleChangeImages);
-            guessBtn.addEventListener('click', () => {
-                showGuessInput = true;
-                updateGameUI();
-            });
-            endGameBtn.addEventListener('click', handleEndGame);
-            leaveRoomBtn.addEventListener('click', handleLeaveRoom);
-
-            // Guess input actions
-            guessTextInput.addEventListener('input', (e) => {
-                guessText = e.target.value;
-            });
-            confirmGuessBtn.addEventListener('click', handleGuess);
-            cancelGuessBtn.addEventListener('click', () => {
-                showGuessInput = false;
-                guessTextInput.value = '';
-                updateGameUI();
-            });
-
-            // Message form
-            messageForm.addEventListener('submit', handleSendMessage);
+    <script>
+      const state = {
+        name: "",
+        topic: "",
+        words: ["", "", "", "", ""],
+        orderedWords: [],
+      };
+
+      const screens = {
+        intro: document.getElementById("screen-intro"),
+        words: document.getElementById("screen-words"),
+        order: document.getElementById("screen-order"),
+        result: document.getElementById("screen-result"),
+      };
+
+      const progressBars = Array.from(document.querySelectorAll("#progress span"));
+      const introForm = document.getElementById("intro-form");
+      const wordsForm = document.getElementById("words-form");
+      const introError = document.getElementById("introError");
+      const wordsError = document.getElementById("wordsError");
+      const playerNameInput = document.getElementById("playerName");
+      const topicTitleInput = document.getElementById("topicTitle");
+      const wordInputs = Array.from(document.querySelectorAll("#words-form input[type='text']"));
+      const sortableList = document.getElementById("sortableList");
+
+      const finalName = document.getElementById("finalName");
+      const finalTopic = document.getElementById("finalTopic");
+      const resultList = document.getElementById("resultList");
+
+      function setScreen(name) {
+        Object.values(screens).forEach((screen) => screen.classList.remove("active"));
+        screens[name].classList.add("active");
+
+        const order = ["intro", "words", "order", "result"];
+        const activeIndex = order.indexOf(name);
+        progressBars.forEach((bar, index) => {
+          bar.classList.toggle("active", index <= activeIndex);
         });
+      }
+
+      function clearErrors() {
+        introError.textContent = "";
+        wordsError.textContent = "";
+      }
+
+      function fillWordInputs() {
+        state.words.forEach((word, index) => {
+          wordInputs[index].value = word;
+        });
+      }
+
+      function renderSortableList() {
+        sortableList.innerHTML = "";
+        state.orderedWords.forEach((word, index) => {
+          const item = document.createElement("li");
+          item.className = "word-card";
+          item.dataset.word = word;
+          item.innerHTML = `
+            <span class="order-index">${index + 1}</span>
+            <span class="word-text">${escapeHtml(word)}</span>
+            <span class="drag-mark">☰</span>
+          `;
+          sortableList.appendChild(item);
+        });
+      }
+
+      function getCurrentOrder() {
+        return Array.from(sortableList.querySelectorAll(".word-card")).map((card) => card.dataset.word);
+      }
+
+      function renderResult() {
+        finalName.textContent = state.name;
+        finalTopic.textContent = state.topic;
+        resultList.innerHTML = "";
+
+        state.orderedWords.forEach((word, index) => {
+          const chars = Array.from(word);
+          const card = document.createElement("article");
+          card.className = "result-card";
+
+          const slots = chars
+            .map((char, charIndex) => {
+              const showChar = charIndex === 0 ? escapeHtml(char) : "";
+              const className = charIndex === 0 ? "slot revealed" : "slot";
+              return `<span class="${className}">${showChar}</span>`;
+            })
+            .join("");
+
+          card.innerHTML = `
+            <div class="result-top">
+              <span class="result-rank">الترتيب ${index + 1}</span>
+              <span class="result-length">عدد الأحرف: ${chars.length}</span>
+            </div>
+            <div class="slots">${slots}</div>
+          `;
+          resultList.appendChild(card);
+        });
+      }
+
+      function escapeHtml(value) {
+        return value
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      introForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        clearErrors();
+
+        const name = playerNameInput.value.trim();
+        const topic = topicTitleInput.value.trim();
+
+        if (!name || !topic) {
+          introError.textContent = "الرجاء كتابة الاسم وعنوان الموضوع.";
+          return;
+        }
+
+        state.name = name;
+        state.topic = topic;
+        fillWordInputs();
+        setScreen("words");
+      });
+
+      wordsForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        wordsError.textContent = "";
+
+        const words = wordInputs.map((input) => input.value.trim());
+        if (words.some((word) => !word)) {
+          wordsError.textContent = "اكتب جميع الكلمات الخمس قبل المتابعة.";
+          return;
+        }
+
+        state.words = words;
+        state.orderedWords = [...words];
+        renderSortableList();
+        setScreen("order");
+      });
+
+      document.getElementById("backToIntro").addEventListener("click", () => {
+        clearErrors();
+        setScreen("intro");
+      });
+
+      document.getElementById("editWords").addEventListener("click", () => {
+        state.words = getCurrentOrder();
+        fillWordInputs();
+        setScreen("words");
+      });
+
+      document.getElementById("finishGame").addEventListener("click", () => {
+        state.orderedWords = getCurrentOrder();
+        renderResult();
+        setScreen("result");
+      });
+
+      document.getElementById("restartBtn").addEventListener("click", () => {
+        state.name = "";
+        state.topic = "";
+        state.words = ["", "", "", "", ""];
+        state.orderedWords = [];
+
+        playerNameInput.value = "";
+        topicTitleInput.value = "";
+        fillWordInputs();
+        sortableList.innerHTML = "";
+        resultList.innerHTML = "";
+        clearErrors();
+        setScreen("intro");
+      });
+
+      let activeDragItem = null;
+      let dragPointerId = null;
+      let dragStartY = 0;
+
+      sortableList.addEventListener("pointerdown", (event) => {
+        const item = event.target.closest(".word-card");
+        if (!item) {
+          return;
+        }
+
+        activeDragItem = item;
+        dragPointerId = event.pointerId;
+        dragStartY = event.clientY;
+
+        item.classList.add("dragging");
+        item.style.zIndex = "30";
+        item.setPointerCapture?.(dragPointerId);
+        document.body.classList.add("no-scroll");
+      });
+
+      sortableList.addEventListener("pointermove", (event) => {
+        if (!activeDragItem || event.pointerId !== dragPointerId) {
+          return;
+        }
+
+        event.preventDefault();
+        const deltaY = event.clientY - dragStartY;
+        activeDragItem.style.transform = `translateY(${deltaY}px)`;
+
+        const siblings = Array.from(sortableList.querySelectorAll(".word-card:not(.dragging)"));
+        const nextItem = siblings.find((sibling) => {
+          const box = sibling.getBoundingClientRect();
+          return event.clientY < box.top + box.height / 2;
+        });
+
+        if (nextItem) {
+          sortableList.insertBefore(activeDragItem, nextItem);
+        } else {
+          sortableList.appendChild(activeDragItem);
+        }
+
+        Array.from(sortableList.children).forEach((card, index) => {
+          const counter = card.querySelector(".order-index");
+          counter.textContent = index + 1;
+        });
+      });
+
+      function endDrag(event) {
+        if (!activeDragItem) {
+          return;
+        }
+        if (event.pointerId !== undefined && event.pointerId !== dragPointerId) {
+          return;
+        }
+
+        activeDragItem.classList.remove("dragging");
+        activeDragItem.style.transform = "";
+        activeDragItem.style.zIndex = "";
+        activeDragItem.releasePointerCapture?.(dragPointerId);
+
+        activeDragItem = null;
+        dragPointerId = null;
+        dragStartY = 0;
+        document.body.classList.remove("no-scroll");
+      }
+
+      sortableList.addEventListener("pointerup", endDrag);
+      sortableList.addEventListener("pointercancel", endDrag);
+      sortableList.addEventListener("lostpointercapture", endDrag);
     </script>
-</body>
+  </body>
 </html>
