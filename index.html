@@ -44,7 +44,7 @@
         background: linear-gradient(150deg, var(--bg-start), var(--bg-end));
         min-height: 100dvh;
         position: relative;
-        overflow-x: hidden;
+        overflow: hidden;
       }
 
       body::before,
@@ -74,26 +74,21 @@
         opacity: 0.22;
       }
 
-      body.no-scroll {
-        overflow: hidden;
-        touch-action: none;
-      }
-
       .app {
         width: min(100%, 440px);
         margin: 0 auto;
-        min-height: 100dvh;
-        padding: 18px 16px 24px;
+        height: 100dvh;
+        padding: 10px 10px 12px;
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        gap: 10px;
       }
 
       .app-head {
         background: var(--surface);
         border: 1px solid var(--border);
         border-radius: var(--radius-lg);
-        padding: 14px 16px;
+        padding: 10px 12px;
         box-shadow: var(--shadow);
         backdrop-filter: blur(8px);
       }
@@ -124,7 +119,7 @@
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 8px;
-        margin-top: 12px;
+        margin-top: 8px;
       }
 
       .progress span {
@@ -142,10 +137,12 @@
       .screen {
         display: none;
         animation: rise 0.32s ease;
+        height: 100%;
+        min-height: 0;
       }
 
       .screen.active {
-        display: block;
+        display: flex;
       }
 
       @keyframes rise {
@@ -163,26 +160,34 @@
         background: var(--surface);
         border: 1px solid var(--border);
         border-radius: var(--radius-xl);
-        padding: 18px 14px;
+        padding: 12px;
         box-shadow: var(--shadow);
         backdrop-filter: blur(6px);
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        width: 100%;
+        min-height: 0;
       }
 
       .panel h2 {
-        margin: 0 0 6px;
-        font-size: 21px;
+        margin: 0 0 4px;
+        font-size: 20px;
       }
 
       .panel p {
         margin: 0;
         color: var(--muted);
-        font-size: 14px;
+        font-size: 13px;
       }
 
       .form-grid {
-        display: grid;
-        gap: 12px;
-        margin-top: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 10px;
+        flex: 1;
+        min-height: 0;
       }
 
       label {
@@ -196,8 +201,8 @@
         width: 100%;
         border: 1px solid var(--border);
         border-radius: var(--radius-md);
-        min-height: 48px;
-        padding: 12px 14px;
+        min-height: 42px;
+        padding: 9px 12px;
         font: inherit;
         color: var(--ink);
         background: var(--surface-strong);
@@ -213,7 +218,7 @@
       .actions {
         display: flex;
         gap: 10px;
-        margin-top: 16px;
+        margin-top: auto;
       }
 
       button {
@@ -221,7 +226,7 @@
         font: inherit;
         font-weight: 700;
         border-radius: 12px;
-        min-height: 46px;
+        min-height: 42px;
         padding: 0 14px;
         cursor: pointer;
       }
@@ -238,27 +243,30 @@
       }
 
       .error {
-        min-height: 20px;
-        margin-top: 10px;
-        font-size: 13px;
+        min-height: 16px;
+        margin-top: 6px;
+        font-size: 12px;
         color: #c42c2c;
       }
 
       .hint {
-        margin-top: 12px;
+        margin-top: 8px;
         background: rgba(255, 138, 91, 0.11);
         color: #a14922;
         border-radius: 12px;
-        padding: 8px 10px;
-        font-size: 13px;
+        padding: 6px 8px;
+        font-size: 12px;
       }
 
       .sortable-list {
         list-style: none;
-        margin: 14px 0 0;
+        margin: 8px 0 0;
         padding: 0;
-        display: grid;
-        gap: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex: 1;
+        min-height: 0;
       }
 
       .word-card {
@@ -266,18 +274,20 @@
         border-radius: var(--radius-md);
         background: var(--surface-strong);
         box-shadow: 0 8px 18px rgba(16, 56, 63, 0.12);
-        padding: 13px 12px;
+        padding: 10px;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
         touch-action: none;
         user-select: none;
         transition: transform 0.18s ease, box-shadow 0.18s ease;
+        cursor: grab;
       }
 
       .word-card.dragging {
         opacity: 0.92;
         box-shadow: 0 18px 30px rgba(11, 55, 60, 0.26);
+        cursor: grabbing;
       }
 
       .order-index {
@@ -295,8 +305,11 @@
 
       .word-text {
         flex: 1;
-        font-size: 18px;
+        font-size: 16px;
         font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .drag-mark {
@@ -306,26 +319,26 @@
       }
 
       .result-header {
-        margin-bottom: 14px;
+        margin-bottom: 8px;
       }
 
       .result-title {
-        margin: 0 0 10px;
-        font-size: 24px;
+        margin: 0 0 8px;
+        font-size: 20px;
       }
 
       .player-meta {
         background: var(--surface-strong);
         border: 1px solid var(--border);
         border-radius: var(--radius-lg);
-        padding: 12px;
+        padding: 8px;
         display: grid;
-        gap: 6px;
+        gap: 4px;
       }
 
       .meta-line {
         margin: 0;
-        font-size: 16px;
+        font-size: 14px;
         font-weight: 700;
       }
 
@@ -335,33 +348,36 @@
       }
 
       .result-list {
-        display: grid;
+        display: flex;
+        flex-direction: column;
         gap: 12px;
-        margin-top: 14px;
+        margin-top: 8px;
+        flex: 1;
+        min-height: 0;
       }
 
       .result-card {
         background: var(--surface-strong);
         border: 1px solid var(--border);
         border-radius: var(--radius-lg);
-        padding: 12px;
+        padding: 8px;
       }
 
       .result-top {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
       }
 
       .result-rank {
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 800;
         color: var(--primary-dark);
       }
 
       .result-length {
-        font-size: 13px;
+        font-size: 12px;
         color: var(--muted);
         font-weight: 700;
       }
@@ -369,19 +385,20 @@
       .slots {
         display: flex;
         flex-wrap: nowrap;
-        gap: 6px;
+        gap: 4px;
         overflow-x: auto;
-        padding-bottom: 2px;
+        overflow-y: hidden;
+        padding-bottom: 1px;
       }
 
       .slot {
-        width: 34px;
-        height: 40px;
+        width: 26px;
+        height: 30px;
         border: 1px solid rgba(18, 52, 59, 0.24);
-        border-radius: 10px;
+        border-radius: 8px;
         display: grid;
         place-items: center;
-        font-size: 18px;
+        font-size: 15px;
         font-weight: 800;
         color: var(--ink);
         flex-shrink: 0;
@@ -394,7 +411,49 @@
       }
 
       .restart-wrap {
-        margin-top: 14px;
+        margin-top: 8px;
+      }
+
+      main {
+        flex: 1;
+        min-height: 0;
+      }
+
+      @media (max-height: 760px) {
+        .app {
+          padding: 8px 8px 10px;
+          gap: 8px;
+        }
+
+        .app-head {
+          padding: 8px 10px;
+        }
+
+        .panel {
+          padding: 10px;
+        }
+
+        .panel h2 {
+          font-size: 18px;
+        }
+
+        label {
+          font-size: 13px;
+          margin-bottom: 4px;
+        }
+
+        input[type="text"] {
+          min-height: 38px;
+          padding: 8px 10px;
+        }
+
+        .word-card {
+          padding: 8px;
+        }
+
+        .result-title {
+          font-size: 18px;
+        }
       }
     </style>
   </head>
@@ -402,8 +461,6 @@
     <div class="app">
       <header class="app-head">
         <span class="badge">لعبة تحدي الكلمات</span>
-        <h1>رتب الكلمات من السهل إلى الأصعب</h1>
-        <p class="subtitle">نسخة سريعة ومريحة للجوال</p>
         <div class="progress" id="progress">
           <span class="active"></span>
           <span></span>
@@ -573,21 +630,29 @@
 
       function renderSortableList() {
         sortableList.innerHTML = "";
-        state.orderedWords.forEach((word, index) => {
+        state.orderedWords.forEach((word) => {
           const item = document.createElement("li");
           item.className = "word-card";
           item.dataset.word = word;
           item.innerHTML = `
-            <span class="order-index">${index + 1}</span>
+            <span class="order-index"></span>
             <span class="word-text">${escapeHtml(word)}</span>
             <span class="drag-mark">☰</span>
           `;
           sortableList.appendChild(item);
         });
+        updateOrderNumbers();
       }
 
       function getCurrentOrder() {
         return Array.from(sortableList.querySelectorAll(".word-card")).map((card) => card.dataset.word);
+      }
+
+      function updateOrderNumbers() {
+        Array.from(sortableList.children).forEach((card, index) => {
+          const counter = card.querySelector(".order-index");
+          counter.textContent = index + 1;
+        });
       }
 
       function renderResult() {
@@ -695,38 +760,30 @@
       });
 
       let activeDragItem = null;
-      let dragPointerId = null;
       let dragStartY = 0;
+      let activeTouchId = null;
+      let dragMode = "";
 
-      sortableList.addEventListener("pointerdown", (event) => {
-        const item = event.target.closest(".word-card");
-        if (!item) {
-          return;
-        }
-
+      function beginDrag(item, startY, mode) {
         activeDragItem = item;
-        dragPointerId = event.pointerId;
-        dragStartY = event.clientY;
+        dragStartY = startY;
+        dragMode = mode;
+        activeDragItem.classList.add("dragging");
+        activeDragItem.style.zIndex = "30";
+      }
 
-        item.classList.add("dragging");
-        item.style.zIndex = "30";
-        item.setPointerCapture?.(dragPointerId);
-        document.body.classList.add("no-scroll");
-      });
-
-      sortableList.addEventListener("pointermove", (event) => {
-        if (!activeDragItem || event.pointerId !== dragPointerId) {
+      function moveDrag(currentY) {
+        if (!activeDragItem) {
           return;
         }
 
-        event.preventDefault();
-        const deltaY = event.clientY - dragStartY;
+        const deltaY = currentY - dragStartY;
         activeDragItem.style.transform = `translateY(${deltaY}px)`;
 
         const siblings = Array.from(sortableList.querySelectorAll(".word-card:not(.dragging)"));
         const nextItem = siblings.find((sibling) => {
           const box = sibling.getBoundingClientRect();
-          return event.clientY < box.top + box.height / 2;
+          return currentY < box.top + box.height / 2;
         });
 
         if (nextItem) {
@@ -735,34 +792,97 @@
           sortableList.appendChild(activeDragItem);
         }
 
-        Array.from(sortableList.children).forEach((card, index) => {
-          const counter = card.querySelector(".order-index");
-          counter.textContent = index + 1;
-        });
-      });
+        updateOrderNumbers();
+      }
 
-      function endDrag(event) {
+      function endDrag() {
         if (!activeDragItem) {
-          return;
-        }
-        if (event.pointerId !== undefined && event.pointerId !== dragPointerId) {
           return;
         }
 
         activeDragItem.classList.remove("dragging");
         activeDragItem.style.transform = "";
         activeDragItem.style.zIndex = "";
-        activeDragItem.releasePointerCapture?.(dragPointerId);
-
         activeDragItem = null;
-        dragPointerId = null;
         dragStartY = 0;
-        document.body.classList.remove("no-scroll");
+        activeTouchId = null;
+        dragMode = "";
       }
 
-      sortableList.addEventListener("pointerup", endDrag);
-      sortableList.addEventListener("pointercancel", endDrag);
-      sortableList.addEventListener("lostpointercapture", endDrag);
+      sortableList.addEventListener("touchstart", (event) => {
+        const item = event.target.closest(".word-card");
+        if (!item) {
+          return;
+        }
+
+        const touch = event.changedTouches[0];
+        activeTouchId = touch.identifier;
+        beginDrag(item, touch.clientY, "touch");
+        event.preventDefault();
+      });
+
+      document.addEventListener(
+        "touchmove",
+        (event) => {
+          if (!activeDragItem || dragMode !== "touch") {
+            return;
+          }
+
+          const touch = Array.from(event.changedTouches).find((t) => t.identifier === activeTouchId);
+          if (!touch) {
+            return;
+          }
+
+          moveDrag(touch.clientY);
+          event.preventDefault();
+        },
+        { passive: false }
+      );
+
+      document.addEventListener("touchend", (event) => {
+        if (!activeDragItem || dragMode !== "touch") {
+          return;
+        }
+
+        const touch = Array.from(event.changedTouches).find((t) => t.identifier === activeTouchId);
+        if (!touch) {
+          return;
+        }
+
+        endDrag();
+      });
+
+      document.addEventListener("touchcancel", () => {
+        endDrag();
+      });
+
+      sortableList.addEventListener("mousedown", (event) => {
+        if (event.button !== 0) {
+          return;
+        }
+
+        const item = event.target.closest(".word-card");
+        if (!item) {
+          return;
+        }
+
+        beginDrag(item, event.clientY, "mouse");
+        event.preventDefault();
+      });
+
+      document.addEventListener("mousemove", (event) => {
+        if (!activeDragItem || dragMode !== "mouse") {
+          return;
+        }
+
+        moveDrag(event.clientY);
+      });
+
+      document.addEventListener("mouseup", () => {
+        if (dragMode === "mouse") {
+          endDrag();
+        }
+      });
     </script>
   </body>
 </html>
