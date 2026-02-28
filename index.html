@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>تحدي الكلمات</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -348,12 +348,20 @@
         font-size: 20px;
       }
 
+      .result-meta-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
       .player-meta {
         background: var(--surface-strong);
         border: 1px solid var(--border);
         border-radius: var(--radius-lg);
         padding: 8px;
         display: block;
+        flex: 1;
       }
 
       .meta-line {
@@ -475,13 +483,14 @@
       }
 
       .opponent-points {
-        margin-top: 8px;
         background: rgba(15, 139, 141, 0.1);
         border: 1px solid rgba(15, 139, 141, 0.24);
         border-radius: 12px;
         padding: 8px;
         font-size: 14px;
         font-weight: 800;
+        white-space: nowrap;
+        flex-shrink: 0;
       }
 
       .restart-wrap {
@@ -633,13 +642,15 @@
           <div class="panel">
             <div class="result-header">
               <h2 class="result-title">شارك كلماتك مع خصمك</h2>
-              <div class="player-meta">
-                <p class="meta-line">
-                  الكلمات التالية عن الـ : <strong id="finalTopic"></strong>
-                </p>
-              </div>
-              <div class="opponent-points">
-                نقاط الخصم: <strong id="opponentPoints">0</strong>
+              <div class="result-meta-row">
+                <div class="player-meta">
+                  <p class="meta-line">
+                    الكلمات التالية عن: <strong id="finalTopic"></strong>
+                  </p>
+                </div>
+                <div class="opponent-points">
+                  نقاط الخصم: <strong id="opponentPoints">0</strong>
+                </div>
               </div>
             </div>
             <div class="result-list" id="resultList"></div>
@@ -885,7 +896,7 @@
         context.textAlign = "right";
         context.fillStyle = "#12343b";
         context.font = '700 32px "Cairo", sans-serif';
-        context.fillText(`الكلمات التالية عن الـ : ${state.topic}`, width - 72, 94);
+        context.fillText(`الكلمات التالية عن: ${state.topic}`, width - 72, 94);
 
         state.resultRows.forEach((row, index) => {
           const letterCount = Array.from(row.word).length;
@@ -1093,9 +1104,6 @@
             return;
           }
           row.showAll = !row.showAll;
-          if (!row.showAll) {
-            row.revealedCount = 1;
-          }
           renderResult();
           return;
         }
@@ -1139,4 +1147,3 @@
     </script>
   </body>
 </html>
-
