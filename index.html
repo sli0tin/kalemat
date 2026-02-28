@@ -457,7 +457,8 @@
         width: 24px;
         padding: 0;
         border-radius: 8px;
-        font-size: 13px;
+        font-size: 15px;
+        font-weight: 800;
         line-height: 1;
         border: 1px solid var(--border);
         background: #f5fafb;
@@ -465,16 +466,27 @@
       }
 
       .result-btn.reveal {
-        color: #c42c2c;
+        color: #c41212;
+        -webkit-text-fill-color: #c41212;
+        border-color: rgba(196, 18, 18, 0.38);
+        background: #fff0f0;
       }
 
       .result-btn.correct {
-        color: #1f8b57;
+        color: #168a4a;
+        -webkit-text-fill-color: #168a4a;
+        border-color: rgba(22, 138, 74, 0.38);
+        background: #edfbf2;
       }
 
       .result-btn:disabled {
-        opacity: 0.46;
+        opacity: 0.72;
         cursor: not-allowed;
+      }
+
+      .result-btn.reveal:disabled,
+      .result-btn.correct:disabled {
+        opacity: 0.72;
       }
 
       .result-card.solved {
@@ -810,7 +822,7 @@
           const eyeDisabled = row.solved || (!row.showAll && visibleCount >= chars.length);
           const revealDisabled = row.solved || row.revealedCount >= chars.length;
           const eyeLabel = row.showAll && !row.solved ? "🙈" : "👁";
-          const checkLabel = row.solved ? "✅" : "✔";
+          const checkLabel = "✓";
 
           const slots = chars
             .map((char, charIndex) => {
@@ -836,7 +848,7 @@
                   ${eyeLabel}
                 </button>
                 <button class="result-btn reveal" type="button" data-action="reveal-letter" aria-label="كشف حرف" ${revealDisabled ? "disabled" : ""}>
-                  ➖
+                  −
                 </button>
                 <button class="result-btn correct" type="button" data-action="mark-correct" aria-label="إجابة صحيحة" ${row.solved ? "disabled" : ""}>
                   ${checkLabel}
