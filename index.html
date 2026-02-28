@@ -34,9 +34,10 @@
 
       html,
       body {
-        height: 100%;
+        min-height: 100%;
         width: 100%;
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: auto;
       }
 
       body {
@@ -47,7 +48,8 @@
         min-height: 100vh;
         min-height: 100svh;
         position: relative;
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: auto;
       }
 
       body::before,
@@ -80,8 +82,8 @@
       .app {
         width: min(100%, 440px);
         margin: 0 auto;
-        height: 100vh;
-        height: 100svh;
+        min-height: 100vh;
+        min-height: 100svh;
         padding: calc(10px + env(safe-area-inset-top, 0px)) 10px
           calc(12px + env(safe-area-inset-bottom, 0px));
         display: flex;
@@ -145,6 +147,7 @@
         flex: 1;
         min-height: 0;
         width: 100%;
+        overflow-y: auto;
       }
 
       .screen.active {
@@ -195,6 +198,7 @@
         margin-top: 10px;
         flex: 1;
         min-height: 0;
+        overflow-y: auto;
       }
 
       label {
@@ -274,6 +278,7 @@
         gap: 8px;
         flex: 1;
         min-height: 0;
+        overflow-y: auto;
       }
 
       .word-card {
@@ -285,16 +290,9 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        touch-action: none;
+        touch-action: manipulation;
         user-select: none;
-        transition: transform 0.18s ease, box-shadow 0.18s ease;
-        cursor: grab;
-      }
-
-      .word-card.dragging {
-        opacity: 0.92;
-        box-shadow: 0 18px 30px rgba(11, 55, 60, 0.26);
-        cursor: grabbing;
+        transition: box-shadow 0.18s ease;
       }
 
       .order-index {
@@ -319,10 +317,26 @@
         text-overflow: ellipsis;
       }
 
-      .drag-mark {
-        color: var(--muted);
-        font-size: 18px;
+      .order-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .order-btn {
+        min-height: 30px;
+        width: 34px;
+        padding: 0;
+        border-radius: 10px;
+        background: #eef5f6;
+        color: var(--ink);
+        font-size: 17px;
         line-height: 1;
+      }
+
+      .order-btn:disabled {
+        opacity: 0.38;
+        cursor: not-allowed;
       }
 
       .result-header {
@@ -361,6 +375,7 @@
         margin-top: 8px;
         flex: 1;
         min-height: 0;
+        overflow-y: auto;
       }
 
       .result-card {
@@ -375,12 +390,14 @@
         align-items: center;
         justify-content: space-between;
         margin-bottom: 6px;
+        gap: 8px;
+        flex-wrap: wrap;
       }
 
-      .result-rank {
+      .result-points {
         font-size: 13px;
         font-weight: 800;
-        color: var(--primary-dark);
+        color: #a14922;
       }
 
       .result-length {
@@ -417,14 +434,55 @@
         border-color: rgba(15, 139, 141, 0.5);
       }
 
+      .result-actions {
+        margin-top: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .result-btn {
+        min-height: 34px;
+        font-size: 12px;
+        border: 1px solid var(--border);
+        background: #f5fafb;
+        color: var(--ink);
+      }
+
+      .result-btn:disabled {
+        opacity: 0.46;
+        cursor: not-allowed;
+      }
+
+      .result-card.solved {
+        border-color: rgba(24, 131, 79, 0.48);
+        background: rgba(226, 249, 237, 0.86);
+      }
+
+      .opponent-points {
+        margin-top: 8px;
+        background: rgba(15, 139, 141, 0.1);
+        border: 1px solid rgba(15, 139, 141, 0.24);
+        border-radius: 12px;
+        padding: 8px;
+        font-size: 14px;
+        font-weight: 800;
+        display: grid;
+        gap: 2px;
+      }
+
       .restart-wrap {
         margin-top: 8px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
       }
 
       main {
         flex: 1;
         display: flex;
         min-height: 0;
+        overflow-y: auto;
       }
 
       @media (max-height: 760px) {
@@ -457,6 +515,11 @@
 
         .word-card {
           padding: 8px;
+        }
+
+        .order-btn {
+          min-height: 28px;
+          width: 32px;
         }
 
         .result-title {
@@ -548,7 +611,7 @@
         <section class="screen" id="screen-order">
           <div class="panel">
             <h2>رتب البطاقات</h2>
-            <p>اسحب البطاقة للأعلى أو للأسفل لتحديد الترتيب من السهل إلى الأصعب.</p>
+            <p>استخدم أسهم الأعلى والأسفل لتحديد الترتيب من السهل إلى الأصعب.</p>
             <p class="hint">يمكنك الرجوع وتعديل أي كلمة قبل الإنهاء.</p>
             <ul class="sortable-list" id="sortableList"></ul>
             <div class="actions">
@@ -573,9 +636,14 @@
                   "<strong id="finalTopic"></strong>"
                 </p>
               </div>
+              <div class="opponent-points">
+                <span>نقاط الخصم المكتسبة: <strong id="opponentPoints">0</strong></span>
+                <span>النقاط المتاحة الآن: <strong id="remainingPoints">0</strong></span>
+              </div>
             </div>
             <div class="result-list" id="resultList"></div>
             <div class="restart-wrap">
+              <button class="btn-primary" id="shareBtn" type="button">مشاركة الصورة</button>
               <button class="btn-secondary" id="restartBtn" type="button">
                 جولة جديدة
               </button>
@@ -586,11 +654,17 @@
     </div>
 
     <script>
+      const BASE_WORD_POINTS = 600;
+      const POINT_STEP = 100;
+      const REVEAL_COST = 100;
+
       const state = {
         name: "",
         topic: "",
         words: ["", "", "", "", ""],
         orderedWords: [],
+        resultRows: [],
+        opponentScore: 0,
       };
 
       const screens = {
@@ -609,10 +683,12 @@
       const topicTitleInput = document.getElementById("topicTitle");
       const wordInputs = Array.from(document.querySelectorAll("#words-form input[type='text']"));
       const sortableList = document.getElementById("sortableList");
-
       const finalName = document.getElementById("finalName");
       const finalTopic = document.getElementById("finalTopic");
+      const opponentPoints = document.getElementById("opponentPoints");
+      const remainingPoints = document.getElementById("remainingPoints");
       const resultList = document.getElementById("resultList");
+      const shareBtn = document.getElementById("shareBtn");
 
       function blurActiveElement() {
         const active = document.activeElement;
@@ -664,7 +740,10 @@
           item.innerHTML = `
             <span class="order-index"></span>
             <span class="word-text">${escapeHtml(word)}</span>
-            <span class="drag-mark">☰</span>
+            <span class="order-controls">
+              <button class="order-btn" type="button" data-move="up" aria-label="نقل للأعلى">▲</button>
+              <button class="order-btn" type="button" data-move="down" aria-label="نقل للأسفل">▼</button>
+            </span>
           `;
           sortableList.appendChild(item);
         });
@@ -676,43 +755,252 @@
       }
 
       function updateOrderNumbers() {
-        Array.from(sortableList.children).forEach((card, index) => {
+        const cards = Array.from(sortableList.children);
+        cards.forEach((card, index) => {
           const counter = card.querySelector(".order-index");
+          const upButton = card.querySelector('[data-move="up"]');
+          const downButton = card.querySelector('[data-move="down"]');
           counter.textContent = index + 1;
+          upButton.disabled = index === 0;
+          downButton.disabled = index === cards.length - 1;
         });
+      }
+
+      function initializeResultRows() {
+        state.opponentScore = 0;
+        state.resultRows = state.orderedWords.map((word, index) => ({
+          word,
+          points: BASE_WORD_POINTS + index * POINT_STEP,
+          revealedCount: 1,
+          showAll: false,
+          solved: false,
+        }));
+      }
+
+      function normalizeSlotChar(char, charIndex) {
+        if (charIndex === 0 && char === "ه") {
+          return "هـ";
+        }
+        return char;
+      }
+
+      function getVisibleCount(row, totalChars) {
+        if (row.showAll || row.solved) {
+          return totalChars;
+        }
+        return Math.max(1, Math.min(row.revealedCount, totalChars));
+      }
+
+      function getRemainingPoints() {
+        return state.resultRows
+          .filter((row) => !row.solved)
+          .reduce((total, row) => total + row.points, 0);
       }
 
       function renderResult() {
         finalName.textContent = state.name;
         finalTopic.textContent = state.topic;
+        opponentPoints.textContent = state.opponentScore;
+        remainingPoints.textContent = getRemainingPoints();
         resultList.innerHTML = "";
 
-        state.orderedWords.forEach((word, index) => {
-          const chars = Array.from(word);
-          const card = document.createElement("article");
-          card.className = "result-card";
+        state.resultRows.forEach((row, index) => {
+          const chars = Array.from(row.word);
+          const visibleCount = getVisibleCount(row, chars.length);
+          const eyeDisabled = row.solved || (!row.showAll && visibleCount >= chars.length);
+          const revealDisabled = row.solved || row.revealedCount >= chars.length;
+          const eyeLabel = row.showAll && !row.solved ? "🙈 إخفاء" : "👁 إظهار";
+          const checkLabel = row.solved ? "✅ تم اعتمادها" : "✅ صح";
 
           const slots = chars
             .map((char, charIndex) => {
-              const showChar = charIndex === 0 ? escapeHtml(char) : "";
-              const className = charIndex === 0 ? "slot revealed" : "slot";
-              return `<span class="${className}">${showChar}</span>`;
+              const isVisible = charIndex < visibleCount;
+              const shownChar = isVisible ? escapeHtml(normalizeSlotChar(char, charIndex)) : "";
+              const className = isVisible ? "slot revealed" : "slot";
+              return `<span class="${className}">${shownChar}</span>`;
             })
             .join("");
 
+          const card = document.createElement("article");
+          card.className = `result-card${row.solved ? " solved" : ""}`;
+          card.dataset.index = String(index);
           card.innerHTML = `
             <div class="result-top">
-              <span class="result-rank">الترتيب ${index + 1}</span>
+              <span class="result-points">النقاط: ${row.points}</span>
               <span class="result-length">عدد الأحرف: ${chars.length}</span>
             </div>
             <div class="slots">${slots}</div>
+            <div class="result-actions">
+              <button class="result-btn" type="button" data-action="toggle-word" ${eyeDisabled ? "disabled" : ""}>
+                ${eyeLabel}
+              </button>
+              <button class="result-btn" type="button" data-action="reveal-letter" ${revealDisabled ? "disabled" : ""}>
+                🔤 إظهار حرف
+              </button>
+              <button class="result-btn" type="button" data-action="mark-correct" ${row.solved ? "disabled" : ""}>
+                ${checkLabel}
+              </button>
+            </div>
           `;
           resultList.appendChild(card);
         });
       }
 
+      function getShareWordView(row) {
+        const chars = Array.from(row.word);
+        const visibleCount = getVisibleCount(row, chars.length);
+        return chars
+          .map((char, index) => (index < visibleCount ? normalizeSlotChar(char, index) : "□"))
+          .join(" ");
+      }
+
+      function drawRoundedRect(context, x, y, width, height, radius) {
+        const r = Math.min(radius, width / 2, height / 2);
+        context.beginPath();
+        context.moveTo(x + r, y);
+        context.lineTo(x + width - r, y);
+        context.quadraticCurveTo(x + width, y, x + width, y + r);
+        context.lineTo(x + width, y + height - r);
+        context.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+        context.lineTo(x + r, y + height);
+        context.quadraticCurveTo(x, y + height, x, y + height - r);
+        context.lineTo(x, y + r);
+        context.quadraticCurveTo(x, y, x + r, y);
+        context.closePath();
+      }
+
+      function buildShareImageBlob() {
+        const width = 1080;
+        const rowHeight = 128;
+        const topSection = 290;
+        const bottomPadding = 30;
+        const height = topSection + state.resultRows.length * rowHeight + bottomPadding;
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext("2d");
+        if (!context) {
+          return Promise.reject(new Error("canvas-context-not-available"));
+        }
+
+        const background = context.createLinearGradient(0, 0, width, height);
+        background.addColorStop(0, "#f4fbff");
+        background.addColorStop(1, "#fff6eb");
+        context.fillStyle = background;
+        context.fillRect(0, 0, width, height);
+
+        context.direction = "rtl";
+        context.textAlign = "right";
+        context.fillStyle = "#12343b";
+        context.font = '800 56px "Cairo", sans-serif';
+        context.fillText("تحدي الكلمات", width - 72, 88);
+
+        context.font = '700 32px "Cairo", sans-serif';
+        context.fillText(`اللاعب: ${state.name}`, width - 72, 146);
+        context.fillText(`الموضوع: ${state.topic}`, width - 72, 196);
+        context.fillText(`المكتسبة: ${state.opponentScore} | المتاحة: ${getRemainingPoints()}`, width - 72, 246);
+
+        state.resultRows.forEach((row, index) => {
+          const y = topSection + index * rowHeight;
+          drawRoundedRect(context, 50, y, width - 100, 106, 18);
+          context.fillStyle = "#ffffff";
+          context.fill();
+          context.strokeStyle = "rgba(18, 52, 59, 0.14)";
+          context.lineWidth = 2;
+          context.stroke();
+
+          context.fillStyle = "#12343b";
+          context.font = '700 30px "Cairo", sans-serif';
+          context.fillText(getShareWordView(row), width - 86, y + 44);
+
+          context.fillStyle = "#a14922";
+          context.font = '700 24px "Cairo", sans-serif';
+          context.fillText(`النقاط: ${row.points}`, width - 86, y + 84);
+
+          if (row.solved) {
+            context.fillStyle = "#1f8b57";
+            context.font = '700 22px "Cairo", sans-serif';
+            context.fillText("✅ إجابة صحيحة", width - 86, y + 102);
+          }
+        });
+
+        return new Promise((resolve, reject) => {
+          canvas.toBlob((blob) => {
+            if (blob) {
+              resolve(blob);
+              return;
+            }
+            reject(new Error("failed-to-build-image"));
+          }, "image/png");
+        });
+      }
+
+      function downloadBlob(blob, filename) {
+        const objectUrl = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = objectUrl;
+        anchor.download = filename;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+      }
+
+      async function shareResultImage() {
+        if (!state.resultRows.length) {
+          return;
+        }
+
+        const originalLabel = shareBtn.textContent;
+        shareBtn.disabled = true;
+        shareBtn.textContent = "جارٍ تجهيز الصورة...";
+
+        try {
+          const blob = await buildShareImageBlob();
+          const shareTitle = "تحدي الكلمات";
+          const shareText = `تحدي الكلمات للاعب ${state.name} عن "${state.topic}"`;
+
+          let sharedWithImage = false;
+          if (
+            navigator.share &&
+            navigator.canShare &&
+            typeof File !== "undefined"
+          ) {
+            const file = new File([blob], "word-challenge.png", { type: "image/png" });
+            if (navigator.canShare({ files: [file] })) {
+              await navigator.share({
+                title: shareTitle,
+                text: shareText,
+                files: [file],
+              });
+              sharedWithImage = true;
+            }
+          }
+
+          if (!sharedWithImage && navigator.share) {
+            await navigator.share({ title: shareTitle, text: shareText });
+            downloadBlob(blob, "word-challenge.png");
+            window.alert("تمت مشاركة النص وتحميل صورة الكلمات أيضًا.");
+            return;
+          }
+
+          if (!sharedWithImage) {
+            downloadBlob(blob, "word-challenge.png");
+            window.alert("تم تحميل صورة الكلمات. يمكنك مشاركتها أو أخذ لقطة شاشة.");
+          }
+        } catch (error) {
+          if (!error || error.name !== "AbortError") {
+            window.alert("تعذرت المشاركة الآن. يمكنك أخذ لقطة شاشة يدويًا.");
+          }
+        } finally {
+          shareBtn.disabled = false;
+          shareBtn.textContent = originalLabel;
+        }
+      }
+
       function escapeHtml(value) {
-        return value
+        return String(value)
           .replace(/&/g, "&amp;")
           .replace(/</g, "&lt;")
           .replace(/>/g, "&gt;")
@@ -767,6 +1055,7 @@
 
       document.getElementById("finishGame").addEventListener("click", () => {
         state.orderedWords = getCurrentOrder();
+        initializeResultRows();
         renderResult();
         setScreen("result");
       });
@@ -776,9 +1065,13 @@
         state.topic = "";
         state.words = ["", "", "", "", ""];
         state.orderedWords = [];
+        state.resultRows = [];
+        state.opponentScore = 0;
 
         playerNameInput.value = "";
         topicTitleInput.value = "";
+        opponentPoints.textContent = "0";
+        remainingPoints.textContent = "0";
         fillWordInputs();
         sortableList.innerHTML = "";
         resultList.innerHTML = "";
@@ -786,129 +1079,95 @@
         setScreen("intro");
       });
 
-      let activeDragItem = null;
-      let dragStartY = 0;
-      let activeTouchId = null;
-      let dragMode = "";
-
-      function beginDrag(item, startY, mode) {
-        activeDragItem = item;
-        dragStartY = startY;
-        dragMode = mode;
-        activeDragItem.classList.add("dragging");
-        activeDragItem.style.zIndex = "30";
-      }
-
-      function moveDrag(currentY) {
-        if (!activeDragItem) {
+      sortableList.addEventListener("click", (event) => {
+        const moveButton = event.target.closest(".order-btn");
+        if (!moveButton) {
           return;
         }
 
-        const deltaY = currentY - dragStartY;
-        activeDragItem.style.transform = `translateY(${deltaY}px)`;
+        const card = moveButton.closest(".word-card");
+        if (!card) {
+          return;
+        }
 
-        const siblings = Array.from(sortableList.querySelectorAll(".word-card:not(.dragging)"));
-        const nextItem = siblings.find((sibling) => {
-          const box = sibling.getBoundingClientRect();
-          return currentY < box.top + box.height / 2;
-        });
+        if (moveButton.dataset.move === "up" && card.previousElementSibling) {
+          sortableList.insertBefore(card, card.previousElementSibling);
+        }
 
-        if (nextItem) {
-          sortableList.insertBefore(activeDragItem, nextItem);
-        } else {
-          sortableList.appendChild(activeDragItem);
+        if (moveButton.dataset.move === "down" && card.nextElementSibling) {
+          sortableList.insertBefore(card.nextElementSibling, card);
         }
 
         updateOrderNumbers();
-      }
-
-      function endDrag() {
-        if (!activeDragItem) {
-          return;
-        }
-
-        activeDragItem.classList.remove("dragging");
-        activeDragItem.style.transform = "";
-        activeDragItem.style.zIndex = "";
-        activeDragItem = null;
-        dragStartY = 0;
-        activeTouchId = null;
-        dragMode = "";
-      }
-
-      sortableList.addEventListener("touchstart", (event) => {
-        const item = event.target.closest(".word-card");
-        if (!item) {
-          return;
-        }
-
-        const touch = event.changedTouches[0];
-        activeTouchId = touch.identifier;
-        beginDrag(item, touch.clientY, "touch");
-        event.preventDefault();
       });
 
-      document.addEventListener(
-        "touchmove",
-        (event) => {
-          if (!activeDragItem || dragMode !== "touch") {
+      resultList.addEventListener("click", (event) => {
+        const actionButton = event.target.closest(".result-btn");
+        if (!actionButton) {
+          return;
+        }
+
+        const card = actionButton.closest(".result-card");
+        if (!card) {
+          return;
+        }
+
+        const rowIndex = Number(card.dataset.index);
+        const row = state.resultRows[rowIndex];
+        if (!row) {
+          return;
+        }
+
+        const chars = Array.from(row.word);
+        const action = actionButton.dataset.action;
+
+        if (action === "toggle-word") {
+          if (row.solved) {
             return;
           }
+          row.showAll = !row.showAll;
+          if (!row.showAll) {
+            row.revealedCount = 1;
+          }
+          renderResult();
+          return;
+        }
 
-          const touch = Array.from(event.changedTouches).find((t) => t.identifier === activeTouchId);
-          if (!touch) {
+        if (action === "reveal-letter") {
+          if (row.solved || row.revealedCount >= chars.length) {
             return;
           }
-
-          moveDrag(touch.clientY);
-          event.preventDefault();
-        },
-        { passive: false }
-      );
-
-      document.addEventListener("touchend", (event) => {
-        if (!activeDragItem || dragMode !== "touch") {
+          const confirmed = window.confirm(
+            "هل تريد إظهار حرف إضافي؟ سيتم خصم 100 نقطة من هذه الكلمة."
+          );
+          if (!confirmed) {
+            return;
+          }
+          row.revealedCount += 1;
+          row.points = Math.max(0, row.points - REVEAL_COST);
+          row.showAll = false;
+          renderResult();
           return;
         }
 
-        const touch = Array.from(event.changedTouches).find((t) => t.identifier === activeTouchId);
-        if (!touch) {
-          return;
+        if (action === "mark-correct") {
+          if (row.solved) {
+            return;
+          }
+          const confirmed = window.confirm("هل الخصم أجاب على هذه الكلمة إجابة صحيحة؟");
+          if (!confirmed) {
+            return;
+          }
+          row.solved = true;
+          row.showAll = true;
+          row.revealedCount = chars.length;
+          state.opponentScore += row.points;
+          renderResult();
         }
-
-        endDrag();
       });
 
-      document.addEventListener("touchcancel", () => {
-        endDrag();
-      });
-
-      sortableList.addEventListener("mousedown", (event) => {
-        if (event.button !== 0) {
-          return;
-        }
-
-        const item = event.target.closest(".word-card");
-        if (!item) {
-          return;
-        }
-
-        beginDrag(item, event.clientY, "mouse");
-        event.preventDefault();
-      });
-
-      document.addEventListener("mousemove", (event) => {
-        if (!activeDragItem || dragMode !== "mouse") {
-          return;
-        }
-
-        moveDrag(event.clientY);
-      });
-
-      document.addEventListener("mouseup", () => {
-        if (dragMode === "mouse") {
-          endDrag();
-        }
+      shareBtn.addEventListener("click", () => {
+        shareResultImage();
       });
     </script>
   </body>
