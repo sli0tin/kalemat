@@ -353,19 +353,14 @@
         border: 1px solid var(--border);
         border-radius: var(--radius-lg);
         padding: 8px;
-        display: grid;
-        gap: 4px;
+        display: block;
       }
 
       .meta-line {
         margin: 0;
         font-size: 14px;
         font-weight: 700;
-      }
-
-      .meta-line span {
         color: var(--muted);
-        font-weight: 600;
       }
 
       .result-list {
@@ -465,6 +460,10 @@
         color: #c42c2c;
       }
 
+      .result-btn.correct {
+        color: #1f8b57;
+      }
+
       .result-btn:disabled {
         opacity: 0.46;
         cursor: not-allowed;
@@ -558,17 +557,8 @@
         <section class="screen active" id="screen-intro">
           <div class="panel">
             <h2>ابدأ الجولة</h2>
-            <p>اكتب اسمك وعنوان موضوع الكلمات.</p>
+            <p>اكتب عنوان موضوع الكلمات.</p>
             <form id="intro-form" class="form-grid">
-              <div>
-                <label for="playerName">اكتب اسمك</label>
-                <input
-                  id="playerName"
-                  type="text"
-                  placeholder="مثال: أحمد"
-                  autocomplete="name"
-                />
-              </div>
               <div>
                 <label for="topicTitle">اكتب عنوان موضوع الكلمات</label>
                 <input
@@ -642,12 +632,10 @@
         <section class="screen" id="screen-result">
           <div class="panel">
             <div class="result-header">
-              <h2 class="result-title">خذ سكرين شوت وشاركها مع خصمك</h2>
+              <h2 class="result-title">شارك كلماتك مع خصمك</h2>
               <div class="player-meta">
-                <p class="meta-line"><span>اللاعب:</span> <strong id="finalName"></strong></p>
                 <p class="meta-line">
-                  <span>عن:</span>
-                  "<strong id="finalTopic"></strong>"
+                  الكلمات التالية عن الـ : <strong id="finalTopic"></strong>
                 </p>
               </div>
               <div class="opponent-points">
@@ -656,7 +644,7 @@
             </div>
             <div class="result-list" id="resultList"></div>
             <div class="restart-wrap">
-              <button class="btn-primary" id="shareBtn" type="button">مشاركة الصورة</button>
+              <button class="btn-primary" id="shareBtn" type="button">مشاركة الكلمات</button>
               <button class="btn-secondary" id="restartBtn" type="button">
                 جولة جديدة
               </button>
@@ -672,7 +660,6 @@
       const REVEAL_COST = 100;
 
       const state = {
-        name: "",
         topic: "",
         words: ["", "", "", "", ""],
         orderedWords: [],
@@ -692,11 +679,9 @@
       const wordsForm = document.getElementById("words-form");
       const introError = document.getElementById("introError");
       const wordsError = document.getElementById("wordsError");
-      const playerNameInput = document.getElementById("playerName");
       const topicTitleInput = document.getElementById("topicTitle");
       const wordInputs = Array.from(document.querySelectorAll("#words-form input[type='text']"));
       const sortableList = document.getElementById("sortableList");
-      const finalName = document.getElementById("finalName");
       const finalTopic = document.getElementById("finalTopic");
       const opponentPoints = document.getElementById("opponentPoints");
       const resultList = document.getElementById("resultList");
@@ -804,7 +789,6 @@
       }
 
       function renderResult() {
-        finalName.textContent = state.name;
         finalTopic.textContent = state.topic;
         opponentPoints.textContent = state.opponentScore;
         resultList.innerHTML = "";
@@ -843,7 +827,7 @@
                 <button class="result-btn reveal" type="button" data-action="reveal-letter" aria-label="كشف حرف" ${revealDisabled ? "disabled" : ""}>
                   ➖
                 </button>
-                <button class="result-btn" type="button" data-action="mark-correct" aria-label="إجابة صحيحة" ${row.solved ? "disabled" : ""}>
+                <button class="result-btn correct" type="button" data-action="mark-correct" aria-label="إجابة صحيحة" ${row.solved ? "disabled" : ""}>
                   ${checkLabel}
                 </button>
               </div>
@@ -879,7 +863,7 @@
       function buildShareImageBlob() {
         const width = 1080;
         const rowHeight = 128;
-        const topSection = 290;
+        const topSection = 150;
         const bottomPadding = 30;
         const height = topSection + state.resultRows.length * rowHeight + bottomPadding;
 
@@ -900,15 +884,11 @@
         context.direction = "rtl";
         context.textAlign = "right";
         context.fillStyle = "#12343b";
-        context.font = '800 56px "Cairo", sans-serif';
-        context.fillText("تحدي الكلمات", width - 72, 88);
-
         context.font = '700 32px "Cairo", sans-serif';
-        context.fillText(`اللاعب: ${state.name}`, width - 72, 146);
-        context.fillText(`الموضوع: ${state.topic}`, width - 72, 196);
-        context.fillText(`نقاط الخصم: ${state.opponentScore}`, width - 72, 246);
+        context.fillText(`الكلمات التالية عن الـ : ${state.topic}`, width - 72, 94);
 
         state.resultRows.forEach((row, index) => {
+          const letterCount = Array.from(row.word).length;
           const y = topSection + index * rowHeight;
           drawRoundedRect(context, 50, y, width - 100, 106, 18);
           context.fillStyle = "#ffffff";
@@ -923,7 +903,7 @@
 
           context.fillStyle = "#a14922";
           context.font = '700 24px "Cairo", sans-serif';
-          context.fillText(`النقاط: ${row.points}`, width - 86, y + 84);
+          context.fillText(`النقاط: ${row.points} | عدد الأحرف: ${letterCount}`, width - 86, y + 84);
 
           if (row.solved) {
             context.fillStyle = "#1f8b57";
@@ -1004,15 +984,13 @@
         event.preventDefault();
         clearErrors();
 
-        const name = playerNameInput.value.trim();
         const topic = topicTitleInput.value.trim();
 
-        if (!name || !topic) {
-          introError.textContent = "الرجاء كتابة الاسم وعنوان الموضوع.";
+        if (!topic) {
+          introError.textContent = "الرجاء كتابة عنوان موضوع الكلمات.";
           return;
         }
 
-        state.name = name;
         state.topic = topic;
         fillWordInputs();
         setScreen("words");
@@ -1053,14 +1031,12 @@
       });
 
       document.getElementById("restartBtn").addEventListener("click", () => {
-        state.name = "";
         state.topic = "";
         state.words = ["", "", "", "", ""];
         state.orderedWords = [];
         state.resultRows = [];
         state.opponentScore = 0;
 
-        playerNameInput.value = "";
         topicTitleInput.value = "";
         opponentPoints.textContent = "0";
         fillWordInputs();
