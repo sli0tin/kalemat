@@ -434,19 +434,35 @@
         border-color: rgba(15, 139, 141, 0.5);
       }
 
-      .result-actions {
-        margin-top: 8px;
+      .result-middle {
         display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .result-actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-shrink: 0;
       }
 
       .result-btn {
-        min-height: 34px;
-        font-size: 12px;
+        min-height: 24px;
+        min-width: 24px;
+        width: 24px;
+        padding: 0;
+        border-radius: 8px;
+        font-size: 13px;
+        line-height: 1;
         border: 1px solid var(--border);
         background: #f5fafb;
         color: var(--ink);
+      }
+
+      .result-btn.reveal {
+        color: #c42c2c;
       }
 
       .result-btn:disabled {
@@ -467,8 +483,6 @@
         padding: 8px;
         font-size: 14px;
         font-weight: 800;
-        display: grid;
-        gap: 2px;
       }
 
       .restart-wrap {
@@ -637,8 +651,7 @@
                 </p>
               </div>
               <div class="opponent-points">
-                <span>نقاط الخصم المكتسبة: <strong id="opponentPoints">0</strong></span>
-                <span>النقاط المتاحة الآن: <strong id="remainingPoints">0</strong></span>
+                نقاط الخصم: <strong id="opponentPoints">0</strong>
               </div>
             </div>
             <div class="result-list" id="resultList"></div>
@@ -686,7 +699,6 @@
       const finalName = document.getElementById("finalName");
       const finalTopic = document.getElementById("finalTopic");
       const opponentPoints = document.getElementById("opponentPoints");
-      const remainingPoints = document.getElementById("remainingPoints");
       const resultList = document.getElementById("resultList");
       const shareBtn = document.getElementById("shareBtn");
 
@@ -791,17 +803,10 @@
         return Math.max(1, Math.min(row.revealedCount, totalChars));
       }
 
-      function getRemainingPoints() {
-        return state.resultRows
-          .filter((row) => !row.solved)
-          .reduce((total, row) => total + row.points, 0);
-      }
-
       function renderResult() {
         finalName.textContent = state.name;
         finalTopic.textContent = state.topic;
         opponentPoints.textContent = state.opponentScore;
-        remainingPoints.textContent = getRemainingPoints();
         resultList.innerHTML = "";
 
         state.resultRows.forEach((row, index) => {
@@ -809,8 +814,8 @@
           const visibleCount = getVisibleCount(row, chars.length);
           const eyeDisabled = row.solved || (!row.showAll && visibleCount >= chars.length);
           const revealDisabled = row.solved || row.revealedCount >= chars.length;
-          const eyeLabel = row.showAll && !row.solved ? "🙈 إخفاء" : "👁 إظهار";
-          const checkLabel = row.solved ? "✅ تم اعتمادها" : "✅ صح";
+          const eyeLabel = row.showAll && !row.solved ? "🙈" : "👁";
+          const checkLabel = row.solved ? "✅" : "✔";
 
           const slots = chars
             .map((char, charIndex) => {
@@ -829,17 +834,19 @@
               <span class="result-points">النقاط: ${row.points}</span>
               <span class="result-length">عدد الأحرف: ${chars.length}</span>
             </div>
-            <div class="slots">${slots}</div>
-            <div class="result-actions">
-              <button class="result-btn" type="button" data-action="toggle-word" ${eyeDisabled ? "disabled" : ""}>
-                ${eyeLabel}
-              </button>
-              <button class="result-btn" type="button" data-action="reveal-letter" ${revealDisabled ? "disabled" : ""}>
-                🔤 إظهار حرف
-              </button>
-              <button class="result-btn" type="button" data-action="mark-correct" ${row.solved ? "disabled" : ""}>
-                ${checkLabel}
-              </button>
+            <div class="result-middle">
+              <div class="slots">${slots}</div>
+              <div class="result-actions">
+                <button class="result-btn" type="button" data-action="toggle-word" aria-label="إظهار أو إخفاء" ${eyeDisabled ? "disabled" : ""}>
+                  ${eyeLabel}
+                </button>
+                <button class="result-btn reveal" type="button" data-action="reveal-letter" aria-label="كشف حرف" ${revealDisabled ? "disabled" : ""}>
+                  ➖
+                </button>
+                <button class="result-btn" type="button" data-action="mark-correct" aria-label="إجابة صحيحة" ${row.solved ? "disabled" : ""}>
+                  ${checkLabel}
+                </button>
+              </div>
             </div>
           `;
           resultList.appendChild(card);
@@ -899,7 +906,7 @@
         context.font = '700 32px "Cairo", sans-serif';
         context.fillText(`اللاعب: ${state.name}`, width - 72, 146);
         context.fillText(`الموضوع: ${state.topic}`, width - 72, 196);
-        context.fillText(`المكتسبة: ${state.opponentScore} | المتاحة: ${getRemainingPoints()}`, width - 72, 246);
+        context.fillText(`نقاط الخصم: ${state.opponentScore}`, width - 72, 246);
 
         state.resultRows.forEach((row, index) => {
           const y = topSection + index * rowHeight;
@@ -958,31 +965,16 @@
 
         try {
           const blob = await buildShareImageBlob();
-          const shareTitle = "تحدي الكلمات";
-          const shareText = `تحدي الكلمات للاعب ${state.name} عن "${state.topic}"`;
-
           let sharedWithImage = false;
-          if (
-            navigator.share &&
-            navigator.canShare &&
-            typeof File !== "undefined"
-          ) {
+          if (navigator.share && typeof File !== "undefined") {
             const file = new File([blob], "word-challenge.png", { type: "image/png" });
-            if (navigator.canShare({ files: [file] })) {
+            const canShareFiles = !navigator.canShare || navigator.canShare({ files: [file] });
+            if (canShareFiles) {
               await navigator.share({
-                title: shareTitle,
-                text: shareText,
                 files: [file],
               });
               sharedWithImage = true;
             }
-          }
-
-          if (!sharedWithImage && navigator.share) {
-            await navigator.share({ title: shareTitle, text: shareText });
-            downloadBlob(blob, "word-challenge.png");
-            window.alert("تمت مشاركة النص وتحميل صورة الكلمات أيضًا.");
-            return;
           }
 
           if (!sharedWithImage) {
@@ -1071,7 +1063,6 @@
         playerNameInput.value = "";
         topicTitleInput.value = "";
         opponentPoints.textContent = "0";
-        remainingPoints.textContent = "0";
         fillWordInputs();
         sortableList.innerHTML = "";
         resultList.innerHTML = "";
